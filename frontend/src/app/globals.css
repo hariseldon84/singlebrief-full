@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Import Satoshi font (fallback to Inter if needed) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@layer base {
+  :root {
+    /* SingleBrief Brand Colors */
+    --color-primary: 26 45 100; /* #1A2D64 */
+    --color-highlight: 245 124 0; /* #F57C00 */
+    --color-soft: 255 227 195; /* #FFE3C3 */
+    --color-neutral: 107 114 128; /* #6B7280 */
+    --color-success: 43 174 102; /* #2BAE66 */
+    
+    /* Semantic colors */
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 26 45 100;
+  }
+  
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  /* Enterprise-grade button styles */
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-800 focus:ring-primary focus:ring-offset-2 
+           px-6 py-3 rounded-md font-medium transition-all duration-200 
+           shadow-soft hover:shadow-medium active:shadow-none;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-primary border border-primary hover:bg-primary-50 
+           focus:ring-primary focus:ring-offset-2 px-6 py-3 rounded-md font-medium 
+           transition-all duration-200 shadow-soft hover:shadow-medium;
+  }
+  
+  /* Card styles with enterprise polish */
+  .card-base {
+    @apply bg-white rounded-md shadow-soft border border-gray-100 p-6 
+           transition-all duration-200 hover:shadow-medium;
+  }
+  
+  .card-interactive {
+    @apply card-base hover:border-primary-200 cursor-pointer;
+  }
+  
+  /* Typography hierarchy */
+  .text-display {
+    @apply font-display text-4xl font-bold tracking-tight;
+  }
+  
+  .text-heading {
+    @apply font-display text-2xl font-semibold tracking-tight;
+  }
+  
+  .text-subheading {
+    @apply font-sans text-lg font-medium;
+  }
+  
+  .text-body {
+    @apply font-sans text-base leading-relaxed;
+  }
+  
+  .text-caption {
+    @apply font-sans text-sm text-neutral;
+  }
+  
+  /* Status indicators */
+  .status-success {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
+           bg-success-50 text-success-800 border border-success-200;
+  }
+  
+  .status-warning {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
+           bg-highlight-50 text-highlight-800 border border-highlight-200;
+  }
+  
+  .status-info {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
+           bg-primary-50 text-primary-800 border border-primary-200;
+  }
+}
+
+/* Custom scrollbar for modern look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Loading animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

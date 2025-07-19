@@ -1,0 +1,1 @@
+"""SingleBrief Backend Application"""
