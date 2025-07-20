@@ -8,6 +8,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // Theme colors
+        background: 'rgb(var(--background))',
+        foreground: 'rgb(var(--foreground))',
+        card: 'rgb(var(--card))',
+        'card-foreground': 'rgb(var(--card-foreground))',
+        border: 'rgb(var(--border))',
+        input: 'rgb(var(--input))',
+        ring: 'rgb(var(--ring))',
+        
+        // SingleBrief Brand Colors
         // SingleBrief Brand Colors
         primary: {
           DEFAULT: '#1A2D64', // Primary Blue

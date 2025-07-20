@@ -221,7 +221,11 @@ This project follows the **BMad methodology** for structured development. See th
 
 The next developer should focus on completing Story 4.1 (Integration Hub Framework) which is currently in progress. This component is critical as it enables all future external service integrations.
 
-#### Getting Started
+#### Getting Started# Frontend
+cp frontend/.env.local.example frontend/.env.local
+
+# Backend
+cp backend/.env.example backend/.env
 1. Review the architecture design in `docs/architecture/1-core-modules.md` focusing on the Integration Hub section
 2. Examine Story 4.1 requirements in `docs/stories/4.1.integration-hub-framework.md`
 3. Continue implementation following these priorities:

@@ -43,6 +43,9 @@ async def get_db_session() -> AsyncSession:
         finally:
             await session.close()
 
+# Alias for compatibility
+get_async_session = get_db_session
+
 async def get_redis() -> redis.Redis:
     """Get Redis connection"""
     return redis_client

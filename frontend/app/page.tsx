@@ -1,20 +1,41 @@
 
-export default function Home() {
+import { DashboardHeader } from '../src/components/dashboard/dashboard-header'
+import { DailyBriefCard } from '../src/components/dashboard/daily-brief-card'
+import { TeamStatusCard } from '../src/components/dashboard/team-status-card'
+import { DataSourcesCard } from '../src/components/dashboard/data-sources-card'
+import { QuickActionsCard } from '../src/components/dashboard/quick-actions-card'
+import { RecentQueriesCard } from '../src/components/dashboard/recent-queries-card'
+import { TeamMetricsCard } from '../src/components/dashboard/team-metrics-card'
+
+export default function Dashboard() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-6">SingleBrief</h1>
-      <p className="text-xl mb-8">Answers from everyone. Delivered by one.</p>
-      <div className="p-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4">Welcome to the development environment</h2>
-        <p className="mb-4">The application is now running successfully.</p>
-        <ul className="list-disc pl-6 mb-4">
-          <li>Frontend: Running on port 3000</li>
-          <li>Backend API: Running on port 8000 (after fixes)</li>
-          <li>Database: PostgreSQL on port 5432</li>
-          <li>Cache: Redis on port 6379</li>
-          <li>Task Monitor: Celery Flower on port 5555</li>
-        </ul>
+    <div className="space-y-6">
+      {/* Dashboard Header */}
+      <DashboardHeader />
+      
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Daily Brief - Primary Focus */}
+          <DailyBriefCard />
+          
+          {/* Secondary Cards Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TeamStatusCard />
+            <DataSourcesCard />
+          </div>
+          
+          {/* Team Performance Metrics */}
+          <TeamMetricsCard />
+        </div>
+        
+        {/* Right Column - Sidebar Content */}
+        <div className="lg:col-span-4 space-y-6">
+          <QuickActionsCard />
+          <RecentQueriesCard />
+        </div>
       </div>
     </div>
-  );
+  )
 }

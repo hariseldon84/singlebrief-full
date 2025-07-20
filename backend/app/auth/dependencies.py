@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.core.security import TokenData, verify_token
 from app.models.auth import LoginAttempt, RefreshToken
-from app.models.user import User, UserRole
+from app.models.user import Organization, User, UserRole
 
 logger = structlog.get_logger(__name__)
 
@@ -218,3 +218,17 @@ def get_client_ip(request: Request) -> str:
 def get_user_agent(request: Request) -> str:
     """Extract user agent from request"""
     return request.headers.get("User-Agent", "Unknown")
+
+async def get_current_organization(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db_session),
+) -> Organization:
+    """Get the current user's organization"""
+    if current_user.organization_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User does not belong to any organization",
+        )
+    
+    # Assuming organization is already loaded with the user through relationship
+    return current_user.organization
