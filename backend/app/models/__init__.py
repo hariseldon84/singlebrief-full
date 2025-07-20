@@ -1,15 +1,15 @@
 # Import all models here for SQLAlchemy registration
-from .user import User, Organization, Team, UserTeam, UserSession, UserConsent
-from .auth import RefreshToken, PasswordResetToken, EmailVerificationToken
+from .auth import EmailVerificationToken, PasswordResetToken, RefreshToken
+from .user import Organization, Team, User, UserConsent, UserSession, UserTeam
 
 __all__ = [
     "User",
-    "Organization", 
+    "Organization",
     "Team",
     "UserTeam",
     "UserSession",
     "UserConsent",
     "RefreshToken",
     "PasswordResetToken",
-    "EmailVerificationToken"
+    "EmailVerificationToken",
 ]
