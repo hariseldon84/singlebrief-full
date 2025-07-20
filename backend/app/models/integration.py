@@ -97,7 +97,7 @@ class Integration(Base):
     quota_reset_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     
     # Metadata
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    integration_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional service-specific metadata"
     )
@@ -307,7 +307,7 @@ class DataSource(Base):
     description: Mapped[Optional[str]] = mapped_column(Text)
     
     # Source metadata
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    source_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Source-specific metadata and configuration"
     )
@@ -471,7 +471,7 @@ class IntegrationLog(Base):
     )
     
     # Metadata and context
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    log_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional context and metadata"
     )
@@ -707,3 +707,632 @@ class IntegrationPermission(Base):
 
     def __repr__(self) -> str:
         return f"<IntegrationPermission(id={self.id}, integration_id={self.integration_id}, user_id={self.user_id}, level={self.permission_level})>"
+
+
+class Connector(Base):
+    """Plugin connectors for external services.
+    
+    Defines available connector plugins that can be installed and configured
+    for different external services with versioning and capability tracking.
+    """
+    __tablename__ = "connectors"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    
+    # Connector identification
+    connector_type: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Connector type: slack, teams, gmail, etc."
+    )
+    name: Mapped[str] = mapped_column(
+        String(100), 
+        nullable=False,
+        comment="Human-readable connector name"
+    )
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    
+    # Versioning
+    version: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Semantic version of the connector"
+    )
+    min_framework_version: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Minimum required framework version"
+    )
+    
+    # Connector metadata
+    developer: Mapped[str] = mapped_column(String(100), nullable=False)
+    homepage_url: Mapped[Optional[str]] = mapped_column(String(500))
+    documentation_url: Mapped[Optional[str]] = mapped_column(String(500))
+    support_url: Mapped[Optional[str]] = mapped_column(String(500))
+    
+    # Capabilities and requirements
+    capabilities: Mapped[List[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="List of connector capabilities"
+    )
+    required_scopes: Mapped[List[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="OAuth scopes required by this connector"
+    )
+    supported_auth_types: Mapped[List[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Authentication types: oauth2, api_key, basic, custom"
+    )
+    
+    # Configuration schema
+    config_schema: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="JSON schema for connector configuration"
+    )
+    default_config: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Default configuration values"
+    )
+    
+    # Rate limiting defaults
+    default_rate_limit_hour: Mapped[Optional[int]] = mapped_column()
+    default_rate_limit_day: Mapped[Optional[int]] = mapped_column()
+    burst_limit: Mapped[Optional[int]] = mapped_column()
+    
+    # Status and lifecycle
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        default="active",
+        comment="Status: active, deprecated, archived, experimental"
+    )
+    is_official: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        comment="Whether this is an official connector"
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        comment="Whether this connector is verified"
+    )
+    
+    # Installation and distribution
+    package_url: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        comment="URL to downloadable package"
+    )
+    install_script: Mapped[Optional[str]] = mapped_column(
+        Text,
+        comment="Installation script or instructions"
+    )
+    checksum: Mapped[Optional[str]] = mapped_column(
+        String(128),
+        comment="Package checksum for verification"
+    )
+    
+    # Dependencies
+    dependencies: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="List of connector dependencies"
+    )
+    conflicts: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="List of conflicting connectors"
+    )
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    installations: Mapped[List["ConnectorInstallation"]] = relationship(
+        "ConnectorInstallation", 
+        back_populates="connector",
+        cascade="all, delete-orphan"
+    )
+    health_checks: Mapped[List["ConnectorHealthCheck"]] = relationship(
+        "ConnectorHealthCheck", 
+        back_populates="connector",
+        cascade="all, delete-orphan"
+    )
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_connectors_type", "connector_type"),
+        Index("idx_connectors_status", "status"),
+        Index("idx_connectors_version", "version"),
+        UniqueConstraint("connector_type", "version", name="uq_connector_type_version"),
+        CheckConstraint(
+            "status IN ('active', 'deprecated', 'archived', 'experimental')",
+            name="check_connector_status"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<Connector(id={self.id}, type={self.connector_type}, version={self.version})>"
+
+
+class ConnectorInstallation(Base):
+    """Connector installations in organizations.
+    
+    Tracks which connectors are installed in which organizations
+    with their configuration and update status.
+    """
+    __tablename__ = "connector_installations"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    connector_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("connectors.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    installed_by_user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Installation details
+    installation_config: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Organization-specific connector configuration"
+    )
+    environment: Mapped[str] = mapped_column(
+        String(20), 
+        default="production",
+        comment="Environment: production, staging, development"
+    )
+    
+    # Status
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        default="installed",
+        comment="Status: installed, updating, disabled, failed, uninstalling"
+    )
+    health_status: Mapped[str] = mapped_column(
+        String(20), 
+        default="unknown",
+        comment="Health: healthy, degraded, unhealthy, unknown"
+    )
+    last_health_check: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Update management
+    auto_update: Mapped[bool] = mapped_column(Boolean, default=True)
+    update_channel: Mapped[str] = mapped_column(
+        String(20), 
+        default="stable",
+        comment="Update channel: stable, beta, alpha"
+    )
+    pending_update_version: Mapped[Optional[str]] = mapped_column(String(20))
+    last_update_check: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Usage statistics
+    total_integrations: Mapped[int] = mapped_column(default=0)
+    active_integrations: Mapped[int] = mapped_column(default=0)
+    total_api_calls: Mapped[int] = mapped_column(default=0)
+    last_used_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Error tracking
+    error_count: Mapped[int] = mapped_column(default=0)
+    last_error: Mapped[Optional[str]] = mapped_column(Text)
+    last_error_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Timestamps
+    installed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    connector: Mapped["Connector"] = relationship("Connector", back_populates="installations")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="connector_installations")
+    installed_by: Mapped["User"] = relationship("User", back_populates="connector_installations")
+    rate_limits: Mapped[List["RateLimit"]] = relationship(
+        "RateLimit", 
+        back_populates="connector_installation",
+        cascade="all, delete-orphan"
+    )
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_connector_installations_org", "organization_id"),
+        Index("idx_connector_installations_connector", "connector_id"),
+        Index("idx_connector_installations_status", "status"),
+        Index("idx_connector_installations_health", "health_status"),
+        UniqueConstraint("connector_id", "organization_id", name="uq_connector_org_installation"),
+        CheckConstraint(
+            "status IN ('installed', 'updating', 'disabled', 'failed', 'uninstalling')",
+            name="check_installation_status"
+        ),
+        CheckConstraint(
+            "health_status IN ('healthy', 'degraded', 'unhealthy', 'unknown')",
+            name="check_installation_health_status"
+        ),
+        CheckConstraint(
+            "environment IN ('production', 'staging', 'development')",
+            name="check_installation_environment"
+        ),
+        CheckConstraint(
+            "update_channel IN ('stable', 'beta', 'alpha')",
+            name="check_update_channel"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ConnectorInstallation(id={self.id}, connector_id={self.connector_id}, org_id={self.organization_id})>"
+
+
+class ConnectorHealthCheck(Base):
+    """Health check results for connectors.
+    
+    Tracks health check results and monitoring data for connectors
+    to ensure reliability and performance.
+    """
+    __tablename__ = "connector_health_checks"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    connector_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("connectors.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=True,
+        comment="Organization-specific health check, null for global"
+    )
+    
+    # Health check details
+    check_type: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Type: connectivity, authentication, quota, performance"
+    )
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Status: healthy, degraded, unhealthy, unknown"
+    )
+    
+    # Performance metrics
+    response_time_ms: Mapped[Optional[int]] = mapped_column()
+    success_rate: Mapped[Optional[float]] = mapped_column()
+    error_rate: Mapped[Optional[float]] = mapped_column()
+    throughput_per_minute: Mapped[Optional[int]] = mapped_column()
+    
+    # Resource usage
+    cpu_usage_percent: Mapped[Optional[float]] = mapped_column()
+    memory_usage_mb: Mapped[Optional[int]] = mapped_column()
+    disk_usage_mb: Mapped[Optional[int]] = mapped_column()
+    network_usage_kb: Mapped[Optional[int]] = mapped_column()
+    
+    # Health details
+    message: Mapped[Optional[str]] = mapped_column(Text)
+    details: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        comment="Detailed health check results"
+    )
+    recommendations: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="Health improvement recommendations"
+    )
+    
+    # Context
+    check_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        comment="Additional context and metadata"
+    )
+    external_service_status: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        comment="Status of the external service"
+    )
+    
+    # Timestamps
+    checked_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    next_check_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+
+    # Relationships
+    connector: Mapped["Connector"] = relationship("Connector", back_populates="health_checks")
+    organization: Mapped[Optional["Organization"]] = relationship("Organization", back_populates="connector_health_checks")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_connector_health_checks_connector_checked", "connector_id", "checked_at"),
+        Index("idx_connector_health_checks_org", "organization_id"),
+        Index("idx_connector_health_checks_status", "status"),
+        Index("idx_connector_health_checks_type", "check_type"),
+        CheckConstraint(
+            "check_type IN ('connectivity', 'authentication', 'quota', 'performance', 'resource')",
+            name="check_health_check_type"
+        ),
+        CheckConstraint(
+            "status IN ('healthy', 'degraded', 'unhealthy', 'unknown')",
+            name="check_health_check_status"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ConnectorHealthCheck(id={self.id}, connector_id={self.connector_id}, status={self.status})>"
+
+
+class RateLimit(Base):
+    """Rate limiting configuration and tracking.
+    
+    Manages rate limits for connector installations with adaptive
+    limits and usage tracking.
+    """
+    __tablename__ = "rate_limits"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    connector_installation_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("connector_installations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Rate limit configuration
+    limit_type: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Type: requests_per_minute, requests_per_hour, requests_per_day"
+    )
+    limit_value: Mapped[int] = mapped_column(
+        nullable=False,
+        comment="Maximum number of requests allowed"
+    )
+    burst_limit: Mapped[Optional[int]] = mapped_column(
+        comment="Burst limit for short periods"
+    )
+    window_seconds: Mapped[int] = mapped_column(
+        nullable=False,
+        comment="Time window in seconds"
+    )
+    
+    # Current usage
+    current_usage: Mapped[int] = mapped_column(default=0)
+    window_start: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        nullable=False
+    )
+    last_request_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Adaptive limits
+    is_adaptive: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        comment="Whether limit adapts based on usage patterns"
+    )
+    adaptive_factor: Mapped[Optional[float]] = mapped_column(
+        comment="Factor for adaptive rate limit adjustments"
+    )
+    min_limit: Mapped[Optional[int]] = mapped_column(
+        comment="Minimum adaptive limit"
+    )
+    max_limit: Mapped[Optional[int]] = mapped_column(
+        comment="Maximum adaptive limit"
+    )
+    
+    # Violation tracking
+    violations_count: Mapped[int] = mapped_column(default=0)
+    last_violation_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    consecutive_violations: Mapped[int] = mapped_column(default=0)
+    
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        default="normal",
+        comment="Status: normal, warning, critical, suspended"
+    )
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    connector_installation: Mapped["ConnectorInstallation"] = relationship(
+        "ConnectorInstallation", 
+        back_populates="rate_limits"
+    )
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_rate_limits_installation", "connector_installation_id"),
+        Index("idx_rate_limits_type", "limit_type"),
+        Index("idx_rate_limits_window_start", "window_start"),
+        Index("idx_rate_limits_active", "is_active"),
+        CheckConstraint(
+            "limit_type IN ('requests_per_minute', 'requests_per_hour', 'requests_per_day', 'bytes_per_second')",
+            name="check_rate_limit_type"
+        ),
+        CheckConstraint(
+            "status IN ('normal', 'warning', 'critical', 'suspended')",
+            name="check_rate_limit_status"
+        ),
+        CheckConstraint("limit_value > 0", name="check_positive_limit_value"),
+        CheckConstraint("window_seconds > 0", name="check_positive_window_seconds"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<RateLimit(id={self.id}, type={self.limit_type}, limit={self.limit_value})>"
+
+
+class ConfigurationTemplate(Base):
+    """Configuration templates for connectors.
+    
+    Provides pre-built configuration templates for common
+    connector setups and use cases.
+    """
+    __tablename__ = "configuration_templates"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    connector_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("connectors.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Template identification
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    use_case: Mapped[str] = mapped_column(
+        String(100), 
+        nullable=False,
+        comment="Use case: basic, advanced, enterprise, custom"
+    )
+    category: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Category: security, performance, compliance, integration"
+    )
+    
+    # Template configuration
+    template_config: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Template configuration values"
+    )
+    required_variables: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="Variables that must be provided by user"
+    )
+    optional_variables: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="Optional variables with defaults"
+    )
+    
+    # Validation
+    validation_rules: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        comment="Validation rules for template configuration"
+    )
+    dependencies: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="Dependencies required for this template"
+    )
+    
+    # Usage and popularity
+    usage_count: Mapped[int] = mapped_column(default=0)
+    rating: Mapped[Optional[float]] = mapped_column()
+    is_official: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    
+    # Authorship
+    created_by_user_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True
+    )
+    organization_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=True,
+        comment="Organization template belongs to, null for public"
+    )
+    
+    # Status
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        default="active",
+        comment="Status: active, deprecated, archived"
+    )
+    visibility: Mapped[str] = mapped_column(
+        String(20), 
+        default="public",
+        comment="Visibility: public, private, organization"
+    )
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    connector: Mapped["Connector"] = relationship("Connector")
+    created_by: Mapped[Optional["User"]] = relationship("User", back_populates="configuration_templates")
+    organization: Mapped[Optional["Organization"]] = relationship("Organization", back_populates="configuration_templates")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_configuration_templates_connector", "connector_id"),
+        Index("idx_configuration_templates_use_case", "use_case"),
+        Index("idx_configuration_templates_category", "category"),
+        Index("idx_configuration_templates_status", "status"),
+        Index("idx_configuration_templates_visibility", "visibility"),
+        CheckConstraint(
+            "use_case IN ('basic', 'advanced', 'enterprise', 'custom')",
+            name="check_template_use_case"
+        ),
+        CheckConstraint(
+            "status IN ('active', 'deprecated', 'archived')",
+            name="check_template_status"
+        ),
+        CheckConstraint(
+            "visibility IN ('public', 'private', 'organization')",
+            name="check_template_visibility"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ConfigurationTemplate(id={self.id}, name='{self.name}', connector_id={self.connector_id})>"

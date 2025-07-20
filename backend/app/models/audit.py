@@ -87,7 +87,7 @@ class AuditLog(Base):
         JSONB,
         comment="New values for create/update operations"
     )
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    audit_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional context and metadata"
     )
@@ -772,7 +772,7 @@ class SecurityEvent(Base):
     assigned_to: Mapped[Optional[str]] = mapped_column(String(255))
     
     # Additional data
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    event_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional event metadata and context"
     )

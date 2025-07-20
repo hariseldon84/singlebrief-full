@@ -142,7 +142,7 @@ class ConversationMessage(Base):
         comment="Type: user_query, ai_response, system_message"
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    message_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional metadata like response time, confidence scores, etc."
     )
@@ -342,7 +342,7 @@ class UserMemory(Base):
         comment="Category for organizing memories"
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    memory_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional structured data and context"
     )
@@ -475,7 +475,7 @@ class TeamMemory(Base):
     )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+    team_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column(
         JSONB,
         comment="Additional structured data and context"
     )
@@ -583,6 +583,654 @@ class TeamMemory(Base):
 
     def __repr__(self) -> str:
         return f"<TeamMemory(id={self.id}, title='{self.title}', team_id={self.team_id})>"
+
+
+class UserPreference(Base):
+    """User preferences and learning data for personalization.
+    
+    Tracks user communication style, topic interests, and behavioral patterns
+    to enable personalized AI responses and content delivery.
+    """
+    __tablename__ = "user_preferences"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Preference category and type
+    preference_category: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Category: communication_style, topic_interest, format_preference, timing, feedback"
+    )
+    preference_key: Mapped[str] = mapped_column(
+        String(100), 
+        nullable=False,
+        comment="Specific preference identifier"
+    )
+    preference_value: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Preference value and related metadata"
+    )
+    
+    # Learning and confidence metrics
+    confidence_score: Mapped[float] = mapped_column(
+        default=0.5,
+        comment="Confidence in preference accuracy 0.0-1.0"
+    )
+    learning_source: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Source: explicit_feedback, behavioral_analysis, pattern_detection, manual_override"
+    )
+    evidence_count: Mapped[int] = mapped_column(
+        default=1,
+        comment="Number of evidence points supporting this preference"
+    )
+    
+    # Adaptation tracking
+    last_evidence_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(),
+        comment="When last evidence was collected"
+    )
+    adaptation_rate: Mapped[float] = mapped_column(
+        default=0.1,
+        comment="Rate of preference adaptation 0.0-1.0"
+    )
+    stability_score: Mapped[float] = mapped_column(
+        default=0.5,
+        comment="Stability of preference over time 0.0-1.0"
+    )
+    
+    # Override and manual control
+    is_manually_set: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        comment="Whether preference was manually set by user"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="preferences")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="user_preferences")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_user_preferences_user_category", "user_id", "preference_category"),
+        Index("idx_user_preferences_key", "preference_key"),
+        Index("idx_user_preferences_confidence", "confidence_score"),
+        Index("idx_user_preferences_updated", "updated_at"),
+        UniqueConstraint("user_id", "preference_category", "preference_key", name="uq_user_preference"),
+        CheckConstraint(
+            "preference_category IN ('communication_style', 'topic_interest', 'format_preference', 'timing', 'feedback')",
+            name="check_preference_category"
+        ),
+        CheckConstraint(
+            "confidence_score >= 0.0 AND confidence_score <= 1.0",
+            name="check_preference_confidence_score_range"
+        ),
+        CheckConstraint(
+            "adaptation_rate >= 0.0 AND adaptation_rate <= 1.0",
+            name="check_adaptation_rate_range"
+        ),
+        CheckConstraint(
+            "stability_score >= 0.0 AND stability_score <= 1.0",
+            name="check_stability_score_range"
+        ),
+        CheckConstraint(
+            "learning_source IN ('explicit_feedback', 'behavioral_analysis', 'pattern_detection', 'manual_override')",
+            name="check_learning_source"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<UserPreference(id={self.id}, category={self.preference_category}, key='{self.preference_key}')>"
+
+
+class UserBehaviorPattern(Base):
+    """User behavioral patterns for learning and adaptation.
+    
+    Tracks user interaction patterns, engagement metrics, and behavioral
+    data to improve preference learning and personalization.
+    """
+    __tablename__ = "user_behavior_patterns"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Pattern identification
+    pattern_type: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Type: activity_timing, topic_engagement, response_interaction, query_frequency"
+    )
+    pattern_name: Mapped[str] = mapped_column(
+        String(100), 
+        nullable=False,
+        comment="Descriptive name for the pattern"
+    )
+    pattern_data: Mapped[Dict[str, Any]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Pattern data including metrics, frequencies, and trends"
+    )
+    
+    # Pattern metrics
+    frequency_score: Mapped[float] = mapped_column(
+        default=0.0,
+        comment="How frequently this pattern occurs 0.0-1.0"
+    )
+    consistency_score: Mapped[float] = mapped_column(
+        default=0.0,
+        comment="How consistent this pattern is over time 0.0-1.0"
+    )
+    predictive_value: Mapped[float] = mapped_column(
+        default=0.0,
+        comment="How predictive this pattern is for preferences 0.0-1.0"
+    )
+    
+    # Time window and validation
+    observation_start: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        nullable=False,
+        comment="Start of observation period"
+    )
+    observation_end: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        nullable=False,
+        comment="End of observation period"
+    )
+    sample_size: Mapped[int] = mapped_column(
+        nullable=False,
+        comment="Number of data points used to identify pattern"
+    )
+    
+    # Pattern lifecycle
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_validated: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=False,
+        comment="Whether pattern has been validated through user feedback"
+    )
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="behavior_patterns")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="user_behavior_patterns")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_user_behavior_patterns_user_type", "user_id", "pattern_type"),
+        Index("idx_user_behavior_patterns_frequency", "frequency_score"),
+        Index("idx_user_behavior_patterns_predictive", "predictive_value"),
+        Index("idx_user_behavior_patterns_active", "is_active"),
+        CheckConstraint(
+            "pattern_type IN ('activity_timing', 'topic_engagement', 'response_interaction', 'query_frequency')",
+            name="check_pattern_type"
+        ),
+        CheckConstraint(
+            "frequency_score >= 0.0 AND frequency_score <= 1.0",
+            name="check_frequency_score_range"
+        ),
+        CheckConstraint(
+            "consistency_score >= 0.0 AND consistency_score <= 1.0",
+            name="check_consistency_score_range"
+        ),
+        CheckConstraint(
+            "predictive_value >= 0.0 AND predictive_value <= 1.0",
+            name="check_predictive_value_range"
+        ),
+        CheckConstraint(
+            "observation_start <= observation_end",
+            name="check_observation_period_order"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<UserBehaviorPattern(id={self.id}, type={self.pattern_type}, name='{self.pattern_name}')>"
+
+
+class PrivacyConsent(Base):
+    """Privacy consent tracking for memory data.
+    
+    Tracks user consent for different types of memory processing,
+    data sharing, and retention policies with GDPR compliance.
+    """
+    __tablename__ = "privacy_consents"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Consent details
+    consent_type: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Type: memory_storage, preference_learning, team_sharing, analytics, data_export"
+    )
+    consent_scope: Mapped[str] = mapped_column(
+        String(100), 
+        nullable=False,
+        comment="Scope of consent: personal_memory, team_memory, cross_team, external_sharing"
+    )
+    consent_status: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Status: granted, withdrawn, expired, pending"
+    )
+    
+    # Legal basis and processing purpose
+    legal_basis: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="GDPR legal basis: consent, contract, legal_obligation, vital_interests, public_task, legitimate_interests"
+    )
+    processing_purpose: Mapped[str] = mapped_column(
+        String(200), 
+        nullable=False,
+        comment="Purpose of data processing"
+    )
+    
+    # Consent metadata
+    consent_version: Mapped[str] = mapped_column(
+        String(20), 
+        default="1.0",
+        comment="Version of consent terms"
+    )
+    consent_method: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="How consent was obtained: explicit, implicit, inherited, imported"
+    )
+    consent_evidence: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        comment="Evidence of consent including timestamps, IP, user agent"
+    )
+    
+    # Expiration and renewal
+    granted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="When consent expires (if applicable)"
+    )
+    withdrawn_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="When consent was withdrawn"
+    )
+    last_confirmed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="Last time user confirmed consent"
+    )
+    
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="privacy_consents")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="privacy_consents")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_privacy_consents_user_type", "user_id", "consent_type"),
+        Index("idx_privacy_consents_status", "consent_status"),
+        Index("idx_privacy_consents_expires", "expires_at"),
+        Index("idx_privacy_consents_scope", "consent_scope"),
+        UniqueConstraint("user_id", "consent_type", "consent_scope", name="uq_user_consent"),
+        CheckConstraint(
+            "consent_type IN ('memory_storage', 'preference_learning', 'team_sharing', 'analytics', 'data_export')",
+            name="check_consent_type"
+        ),
+        CheckConstraint(
+            "consent_status IN ('granted', 'withdrawn', 'expired', 'pending')",
+            name="check_consent_status"
+        ),
+        CheckConstraint(
+            "legal_basis IN ('consent', 'contract', 'legal_obligation', 'vital_interests', 'public_task', 'legitimate_interests')",
+            name="check_legal_basis"
+        ),
+        CheckConstraint(
+            "consent_method IN ('explicit', 'implicit', 'inherited', 'imported')",
+            name="check_consent_method"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<PrivacyConsent(id={self.id}, type={self.consent_type}, status={self.consent_status})>"
+
+
+class DataRetentionPolicy(Base):
+    """Data retention policies for different types of memory data.
+    
+    Defines how long different types of memory data should be retained
+    and when they should be automatically archived or deleted.
+    """
+    __tablename__ = "data_retention_policies"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[Optional[str]] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
+        comment="User-specific policy (null for organization default)"
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Policy details
+    data_category: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Category: conversations, decisions, user_memories, team_memories, preferences"
+    )
+    retention_period_days: Mapped[int] = mapped_column(
+        nullable=False,
+        comment="Number of days to retain data (0 = indefinite)"
+    )
+    archive_after_days: Mapped[Optional[int]] = mapped_column(
+        comment="Days after which to archive data (optional)"
+    )
+    
+    # Policy actions
+    action_on_expiry: Mapped[str] = mapped_column(
+        String(20), 
+        nullable=False,
+        comment="Action: delete, archive, anonymize, prompt_user"
+    )
+    notification_days_before: Mapped[Optional[int]] = mapped_column(
+        comment="Days before expiry to notify user"
+    )
+    
+    # Policy metadata
+    policy_source: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Source: user_preference, organization_default, legal_requirement, system_default"
+    )
+    compliance_requirements: Mapped[Optional[List[str]]] = mapped_column(
+        JSONB,
+        comment="List of compliance frameworks this policy satisfies"
+    )
+    
+    # Status and validation
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_overridable: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=True,
+        comment="Whether users can override this policy"
+    )
+    
+    # Timestamps
+    effective_from: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    effective_until: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="When this policy expires"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped[Optional["User"]] = relationship("User", back_populates="retention_policies")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="retention_policies")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_retention_policies_user_category", "user_id", "data_category"),
+        Index("idx_retention_policies_active", "is_active"),
+        Index("idx_retention_policies_effective", "effective_from", "effective_until"),
+        CheckConstraint(
+            "data_category IN ('conversations', 'decisions', 'user_memories', 'team_memories', 'preferences')",
+            name="check_data_category"
+        ),
+        CheckConstraint(
+            "action_on_expiry IN ('delete', 'archive', 'anonymize', 'prompt_user')",
+            name="check_action_on_expiry"
+        ),
+        CheckConstraint(
+            "policy_source IN ('user_preference', 'organization_default', 'legal_requirement', 'system_default')",
+            name="check_policy_source"
+        ),
+        CheckConstraint(
+            "retention_period_days >= 0",
+            name="check_retention_period_positive"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<DataRetentionPolicy(id={self.id}, category={self.data_category}, days={self.retention_period_days})>"
+
+
+class DataExportRequest(Base):
+    """Data export requests for GDPR compliance and portability.
+    
+    Tracks user requests for data exports, ensuring compliance
+    with data portability rights and providing audit trails.
+    """
+    __tablename__ = "data_export_requests"
+
+    id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        primary_key=True, 
+        default=lambda: str(uuid.uuid4())
+    )
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    organization_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), 
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    
+    # Export request details
+    export_type: Mapped[str] = mapped_column(
+        String(50), 
+        nullable=False,
+        comment="Type: full_export, partial_export, specific_data, gdpr_export"
+    )
+    data_categories: Mapped[List[str]] = mapped_column(
+        JSONB,
+        nullable=False,
+        comment="Categories of data to export"
+    )
+    export_format: Mapped[str] = mapped_column(
+        String(20), 
+        default="json",
+        comment="Format: json, csv, xml, pdf"
+    )
+    
+    # Date range and filters
+    date_range_start: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="Start date for data export (null = all time)"
+    )
+    date_range_end: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="End date for data export (null = until now)"
+    )
+    additional_filters: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSONB,
+        comment="Additional filters for data export"
+    )
+    
+    # Request status and processing
+    status: Mapped[str] = mapped_column(
+        String(20), 
+        default="pending",
+        comment="Status: pending, processing, completed, failed, expired"
+    )
+    processing_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Export results
+    export_file_path: Mapped[Optional[str]] = mapped_column(
+        String(500),
+        comment="Path to generated export file"
+    )
+    export_file_size: Mapped[Optional[int]] = mapped_column(
+        comment="Size of export file in bytes"
+    )
+    record_count: Mapped[Optional[int]] = mapped_column(
+        comment="Number of records exported"
+    )
+    
+    # Security and access
+    download_token: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        comment="Secure token for downloading export"
+    )
+    download_expires_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        comment="When download link expires"
+    )
+    download_count: Mapped[int] = mapped_column(
+        default=0,
+        comment="Number of times export was downloaded"
+    )
+    
+    # Error handling
+    error_message: Mapped[Optional[str]] = mapped_column(
+        Text,
+        comment="Error message if export failed"
+    )
+    retry_count: Mapped[int] = mapped_column(
+        default=0,
+        comment="Number of retry attempts"
+    )
+    
+    # Timestamps
+    requested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), 
+        server_default=func.now(), 
+        onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship("User", back_populates="data_export_requests")
+    organization: Mapped["Organization"] = relationship("Organization", back_populates="data_export_requests")
+
+    # Constraints
+    __table_args__ = (
+        Index("idx_data_export_requests_user_status", "user_id", "status"),
+        Index("idx_data_export_requests_requested", "requested_at"),
+        Index("idx_data_export_requests_expires", "download_expires_at"),
+        CheckConstraint(
+            "export_type IN ('full_export', 'partial_export', 'specific_data', 'gdpr_export')",
+            name="check_export_type"
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'processing', 'completed', 'failed', 'expired')",
+            name="check_export_status"
+        ),
+        CheckConstraint(
+            "export_format IN ('json', 'csv', 'xml', 'pdf')",
+            name="check_export_format"
+        ),
+        CheckConstraint(
+            "date_range_start IS NULL OR date_range_end IS NULL OR date_range_start <= date_range_end",
+            name="check_date_range_order"
+        ),
+    )
+
+    def __repr__(self) -> str:
+        return f"<DataExportRequest(id={self.id}, type={self.export_type}, status={self.status})>"
 
 
 class MemoryEmbedding(Base):

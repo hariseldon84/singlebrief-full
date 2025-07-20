@@ -36,14 +36,93 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Smooth scrolling */
+  /* Smooth scrolling with reduced motion support */
   html {
     scroll-behavior: smooth;
   }
   
-  /* Focus styles for accessibility */
+  /* Enhanced focus styles for accessibility */
+  *:focus {
+    outline: none;
+  }
+  
   *:focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .bg-white {
+      background-color: white;
+      border: 1px solid black;
+    }
+    
+    .text-gray-600,
+    .text-gray-500 {
+      color: black;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 15 23 42;
+      --foreground: 241 245 249;
+      --card: 30 41 59;
+      --card-foreground: 241 245 249;
+    }
+  }
+}
+
+/* Accessibility Utilities */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .not-sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 }
 

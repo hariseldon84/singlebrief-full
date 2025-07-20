@@ -71,9 +71,10 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     
     # Vector Database
+    VECTOR_DATABASE_TYPE: str = "weaviate"  # Options: "weaviate", "pinecone"
     PINECONE_API_KEY: Optional[str] = None
     PINECONE_ENVIRONMENT: Optional[str] = None
-    WEAVIATE_URL: Optional[str] = None
+    WEAVIATE_URL: Optional[str] = "http://localhost:8080"
     WEAVIATE_API_KEY: Optional[str] = None
     
     # External Integrations
@@ -93,3 +94,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+def get_settings() -> Settings:
+    """Get application settings"""
+    return settings

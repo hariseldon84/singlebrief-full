@@ -90,6 +90,11 @@ class Organization(Base):
     queries: Mapped[List["Query"]] = relationship("Query", back_populates="organization")
     briefs: Mapped[List["Brief"]] = relationship("Brief", back_populates="organization")
     brief_templates: Mapped[List["BriefTemplate"]] = relationship("BriefTemplate", back_populates="organization")
+    
+    # Integration Hub relationships
+    connector_installations: Mapped[List["ConnectorInstallation"]] = relationship("ConnectorInstallation", back_populates="organization")
+    connector_health_checks: Mapped[List["ConnectorHealthCheck"]] = relationship("ConnectorHealthCheck", back_populates="organization")
+    configuration_templates: Mapped[List["ConfigurationTemplate"]] = relationship("ConfigurationTemplate", back_populates="organization")
 
     def __repr__(self):
         return f"<Organization(name='{self.name}', slug='{self.slug}')>"
@@ -201,6 +206,10 @@ class User(Base):
     queries: Mapped[List["Query"]] = relationship("Query", back_populates="user")
     briefs: Mapped[List["Brief"]] = relationship("Brief", back_populates="user")
     created_brief_templates: Mapped[List["BriefTemplate"]] = relationship("BriefTemplate", back_populates="created_by")
+    
+    # Integration Hub relationships
+    connector_installations: Mapped[List["ConnectorInstallation"]] = relationship("ConnectorInstallation", back_populates="installed_by")
+    configuration_templates: Mapped[List["ConfigurationTemplate"]] = relationship("ConfigurationTemplate", back_populates="created_by")
 
     def __repr__(self):
         return f"<User(email='{self.email}', role='{self.role}')>"
