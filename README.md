@@ -87,14 +87,22 @@ SingleBrief follows a modular architecture with 10 core modules:
 
 ```
 singlebrief_fullversion/
-├── docs/                           # Comprehensive documentation
+├── docs/                          # Comprehensive documentation
 │   ├── prd/                       # Product Requirements Document
 │   ├── architecture/              # System architecture specs
-│   └── stories/                   # Development user stories
+│   ├── stories/                   # Development user stories
+│   └── qa/                        # Quality assurance documentation
+├── backend/                       # FastAPI backend implementation
+├── frontend/                      # Next.js frontend application
+├── scripts/                       # Utility scripts for development
 ├── .bmad-core/                    # BMad methodology framework
 ├── .claude/                       # Claude Code configuration
 ├── .cursor/                       # Cursor IDE rules
+├── .vscode/                       # VS Code configuration
 ├── .github/                       # GitHub workflows and chat modes
+├── .windsurf/                     # Windsurf configuration files
+├── .gemini/                       # Gemini AI configuration
+├── docker-compose.yml             # Docker Compose configuration
 └── README.md                      # This file
 ```
 
