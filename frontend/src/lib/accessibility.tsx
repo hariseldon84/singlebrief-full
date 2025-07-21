@@ -3,6 +3,8 @@
  * WCAG 2.1 AA compliance utilities
  */
 
+import React from 'react'
+
 // Focus management
 export const trapFocus = (element: HTMLElement) => {
   const focusableElements = element.querySelectorAll(

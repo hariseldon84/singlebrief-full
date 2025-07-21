@@ -6,8 +6,8 @@ import { formatRelativeTime, getConfidenceBadgeColor } from '@/lib/utils'
 // Mock data - will be replaced with API calls
 const briefData = {
   brief_id: "brief_20241125_001",
-  generated_at: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-  updated_at: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
+  generated_at: Date.now() - 10 * 60 * 1000, // 10 minutes ago (timestamp)
+  updated_at: Date.now() - 2 * 60 * 1000, // 2 minutes ago (timestamp)
   confidence_score: 87,
   sections: [
     {

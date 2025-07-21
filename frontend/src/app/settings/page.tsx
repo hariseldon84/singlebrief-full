@@ -5,8 +5,7 @@
 
 'use client'
 
-import { useState } from 'react'
-import { Tabs, Tab } from '@headlessui/react'
+import { useState, useEffect } from 'react'
 import { 
   User, 
   Bell, 
@@ -73,7 +72,7 @@ export default function SettingsPage() {
   const { setCurrentPage, setBreadcrumbs } = useAppStore()
 
   // Update navigation context
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage('Settings')
     setBreadcrumbs([
       { name: 'Dashboard', href: '/' },
