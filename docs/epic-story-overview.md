@@ -71,6 +71,22 @@
 5. **Story 6.5**: Context-Aware Team Querying
 6. **Story 6.6**: Feedback Loop and Continuous Improvement
 
+### Epic 7: Collaborative Team Intelligence Platform 🤝
+**Goal**: Transform SingleBrief into a collaborative team intelligence platform with user-initiated queries and real-time collaboration
+**Dependencies**: Epic 1 (Foundation), Epic 2 (AI Intelligence), Epic 3 (Memory), Epic 4 (Communication channels), Epic 6 (Team Interrogation)
+
+#### Stories:
+1. **Story 7.1**: Team Member Profile Management System ✅ *Created*
+2. **Story 7.2**: Interactive Query Builder and Team Selection ✅ *Created*
+3. **Story 7.3**: Email Response Collection and AI Synthesis ✅ *Created*
+4. **Story 7.4**: Raw Team Response Viewer ✅ *Created*
+5. **Story 7.5**: Freemium Team Member Onboarding ✅ *Created*
+6. **Story 7.6**: Real-Time Query Access and Permissions ✅ *Created*
+7. **Story 7.7**: Predefined Team Groups Management ✅ *Created*
+8. **Story 7.8**: Slack Response Collection and Integration ✅ *Created*
+9. **Story 7.9**: Microsoft Teams Response Collection and Integration ✅ *Created*
+10. **Story 7.10**: In-App SingleBrief Response Collection ✅ *Created*
+
 ## Development Sequence Recommendation
 
 ### Phase 1: Foundation (Months 1-2)
@@ -101,9 +117,17 @@
 - Epic 6 advanced stories (6.4-6.6)
 - Performance optimization and scaling
 
+### Phase 7: Collaborative Intelligence Platform (Months 7-10)
+- Epic 7 Stories 7.1-7.3 (Team management, query builder, email collaboration)
+- Epic 7 Stories 7.4-7.7 (Raw responses, team onboarding, real-time collaboration, predefined groups)
+- Epic 7 Stories 7.8-7.10 (Slack, Teams, and In-App response collection platforms)
+- Freemium business model implementation and team member viral growth
+
 ## Story Status Summary
 
-### ✅ ALL STORIES COMPLETED (35/35):
+### ✅ STORIES COMPLETED (35/45):
+
+**Previous Epics 1-6: All 35 stories completed**
 
 **Epic 1: Foundation Infrastructure (5/5 stories complete)**
 ✅ 1.1 Project Setup and Infrastructure Foundation  
@@ -150,26 +174,41 @@
 ✅ 6.5 Context-Aware Team Querying  
 ✅ 6.6 Feedback Loop and Continuous Improvement
 
+**Epic 7: Collaborative Team Intelligence Platform (0/10 stories complete) - NEW**
+📋 7.1 Team Member Profile Management System  
+📋 7.2 Interactive Query Builder and Team Selection  
+📋 7.3 Email Response Collection and AI Synthesis  
+📋 7.4 Raw Team Response Viewer  
+📋 7.5 Freemium Team Member Onboarding  
+📋 7.6 Real-Time Query Access and Permissions  
+📋 7.7 Predefined Team Groups Management  
+📋 7.8 Slack Response Collection and Integration  
+📋 7.9 Microsoft Teams Response Collection and Integration  
+📋 7.10 In-App SingleBrief Response Collection
+
 ## Key Success Metrics Alignment
 
 Each epic aligns with PRD success criteria:
-- **80% time reduction** → Epic 5 (Daily Briefs) + Epic 6 (Team Interrogation)
+- **80% time reduction** → Epic 5 (Daily Briefs) + Epic 6 (Team Interrogation) + Epic 7 (Collaborative Intelligence)
 - **90% accuracy feedback** → Epic 2 (AI Intelligence) + Epic 4 (Trust Layer)
 - **60% memory opt-in** → Epic 3 (Memory Engine)
-- **>50% weekly usage** → Epic 1 (Foundation) + Epic 5 (Daily Briefs)
+- **>50% weekly usage** → Epic 1 (Foundation) + Epic 5 (Daily Briefs) + Epic 7 (Team Collaboration)
 - **<3s response time** → Epic 2 (AI Intelligence) + Epic 4 (Data Streams)
-- **85% team response rate** → Epic 6 (Team Interrogation)
+- **85% team response rate** → Epic 6 (Team Interrogation) + Epic 7 (Email Collaboration)
+- **70% team member onboarding** → Epic 7 (Freemium Team Member System) - NEW
+- **90% query routing accuracy** → Epic 7 (AI-Powered Team Selection) - NEW
 
 ## Architecture Compliance
 
 All epics map directly to the core modules defined in the architecture:
-- **Orchestrator Agent** → Epic 1 + Epic 2
-- **Team Comms Crawler** → Epic 4
-- **Memory Engine** → Epic 3
-- **Synthesizer Engine** → Epic 2
+- **Orchestrator Agent** → Epic 1 + Epic 2 + Epic 7 (Query Routing)
+- **Team Comms Crawler** → Epic 4 + Epic 7 (Email Collaboration)
+- **Memory Engine** → Epic 3 + Epic 7 (Team Member Profiles)
+- **Synthesizer Engine** → Epic 2 + Epic 7 (Response Synthesis)
 - **Daily Brief Generator** → Epic 5
-- **Consent & Privacy Layer** → Epic 1 + Epic 3
-- **Dashboard & UI Layer** → Epic 1
-- **Integration Hub** → Epic 4
-- **Trust Layer** → Epic 2
+- **Consent & Privacy Layer** → Epic 1 + Epic 3 + Epic 7 (Permissions)
+- **Dashboard & UI Layer** → Epic 1 + Epic 7 (Collaborative Interface)
+- **Integration Hub** → Epic 4 + Epic 7 (Team Member Systems)
+- **Trust Layer** → Epic 2 + Epic 7 (Response Quality Scoring)
 - **Feedback Engine** → Epic 6
+- **Collaborative Intelligence Platform** → Epic 7 (NEW MODULE)

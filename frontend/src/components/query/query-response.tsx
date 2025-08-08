@@ -42,16 +42,16 @@ export function QueryResponse({ response, onNewQuery }: QueryResponseProps) {
   return (
     <div className="space-y-4">
       {/* Query Echo */}
-      <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-primary">
+      <div className="bg-muted rounded-lg p-4 border-l-4 border-primary">
         <div className="flex items-center space-x-2 mb-2">
           <MessageSquare className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-primary">Your Question</span>
         </div>
-        <p className="text-gray-900">{response.query}</p>
+        <p className="text-foreground">{response.query}</p>
       </div>
 
       {/* Response */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-soft">
+      <div className="bg-card rounded-lg border border-border shadow-soft">
         <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -60,8 +60,8 @@ export function QueryResponse({ response, onNewQuery }: QueryResponseProps) {
                 <span className="text-sm font-medium text-primary">AI</span>
               </div>
               <div>
-                <h3 className="font-medium text-gray-900">Intelligence Assistant</h3>
-                <p className="text-xs text-gray-500">
+                <h3 className="font-medium text-card-foreground">Intelligence Assistant</h3>
+                <p className="text-xs text-muted-foreground">
                   {response.timestamp.toLocaleTimeString()} • Confidence: {Math.round(response.confidence * 100)}%
                 </p>
               </div>
@@ -81,11 +81,11 @@ export function QueryResponse({ response, onNewQuery }: QueryResponseProps) {
 
           {/* Confidence Bar */}
           <div className="mb-4">
-            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
               <span>Confidence Level</span>
               <span>{Math.round(response.confidence * 100)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div 
                 className="bg-primary h-2 rounded-full transition-all duration-500"
                 style={{ width: `${response.confidence * 100}%` }}
@@ -95,22 +95,22 @@ export function QueryResponse({ response, onNewQuery }: QueryResponseProps) {
 
           {/* Response Content */}
           <div className="prose prose-sm max-w-none">
-            <div className="whitespace-pre-line text-gray-900">
+            <div className="whitespace-pre-line text-card-foreground">
               {response.response}
             </div>
           </div>
 
           {/* Sources */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-3">Sources</h4>
+          <div className="mt-6 pt-4 border-t border-border">
+            <h4 className="text-sm font-medium text-card-foreground mb-3">Sources</h4>
             <div className="flex flex-wrap gap-2">
               {response.sources.map((source, index) => (
                 <div
                   key={index}
-                  className="inline-flex items-center space-x-1 bg-gray-100 rounded-full px-3 py-1"
+                  className="inline-flex items-center space-x-1 bg-accent rounded-full px-3 py-1"
                 >
-                  <span className="text-xs font-medium text-gray-700">{source.name}</span>
-                  <span className="text-xs text-gray-500">({source.count})</span>
+                  <span className="text-xs font-medium text-accent-foreground">{source.name}</span>
+                  <span className="text-xs text-muted-foreground">({source.count})</span>
                 </div>
               ))}
             </div>
@@ -118,10 +118,10 @@ export function QueryResponse({ response, onNewQuery }: QueryResponseProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+        <div className="px-6 py-4 bg-muted border-t border-border rounded-b-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Was this helpful?</span>
+              <span className="text-sm text-muted-foreground">Was this helpful?</span>
               <Button
                 variant="ghost"
                 size="sm"

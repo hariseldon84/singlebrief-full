@@ -110,6 +110,14 @@ class Organization(Base):
         "SecurityEvent", back_populates="organization"
     )
 
+    # Authentication relationships  
+    oauth_providers: Mapped[List["OAuthProvider"]] = relationship(
+        "OAuthProvider", back_populates="organization"
+    )
+    api_keys: Mapped[List["APIKey"]] = relationship(
+        "APIKey", back_populates="organization"
+    )
+
     # Intelligence relationships
     queries: Mapped[List["Query"]] = relationship(
         "Query", back_populates="organization"
@@ -282,6 +290,14 @@ class User(Base):
     )
     security_events: Mapped[List["SecurityEvent"]] = relationship(
         "SecurityEvent", back_populates="user"
+    )
+
+    # Authentication relationships
+    auth_sessions: Mapped[List["AuthUserSession"]] = relationship(
+        "AuthUserSession", back_populates="user"
+    )
+    created_api_keys: Mapped[List["APIKey"]] = relationship(
+        "APIKey", back_populates="creator"
     )
 
     # Intelligence relationships

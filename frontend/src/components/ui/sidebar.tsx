@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/lib/stores/app-store'
 import { Button } from './button'
+import { Logo, LogoIcon } from './logo'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home, description: 'Overview and daily brief' },
@@ -56,11 +57,10 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
       {/* Header */}
       <div className="flex h-16 items-center justify-between border-b border-gray-200 px-4">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-            <Brain className="h-5 w-5 text-white" />
-          </div>
-          {(!sidebarCollapsed || mobile) && (
-            <span className="text-xl font-bold text-primary">SingleBrief</span>
+          {(!sidebarCollapsed || mobile) ? (
+            <Logo size="md" showText={true} />
+          ) : (
+            <LogoIcon size="md" />
           )}
         </div>
         
@@ -100,8 +100,8 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
                 className={cn(
                   'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 relative',
                   isActive
-                    ? 'bg-primary-50 text-primary border-r-2 border-primary'
-                    : 'text-neutral hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-blue-700'
                 )}
                 title={sidebarCollapsed && !mobile ? item.description : undefined}
               >
@@ -109,7 +109,7 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
                   className={cn(
                     'h-5 w-5 flex-shrink-0 transition-colors',
                     sidebarCollapsed && !mobile ? 'mr-0' : 'mr-3',
-                    isActive ? 'text-primary' : 'text-neutral group-hover:text-gray-600'
+                    isActive ? 'text-primary' : 'text-gray-500 group-hover:text-blue-700'
                   )}
                 />
                 {(!sidebarCollapsed || mobile) && (
@@ -136,8 +136,8 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
                   className={cn(
                     'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
                     isActive
-                      ? 'bg-primary-50 text-primary border-r-2 border-primary'
-                      : 'text-neutral hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-blue-700'
                   )}
                   title={sidebarCollapsed && !mobile ? item.description : undefined}
                 >
@@ -145,7 +145,7 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
                     className={cn(
                       'h-5 w-5 flex-shrink-0 transition-colors',
                       sidebarCollapsed && !mobile ? 'mr-0' : 'mr-3',
-                      isActive ? 'text-primary' : 'text-neutral group-hover:text-gray-600'
+                      isActive ? 'text-primary' : 'text-gray-500 group-hover:text-blue-700'
                     )}
                   />
                   {(!sidebarCollapsed || mobile) && (
@@ -163,7 +163,7 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
         {(!sidebarCollapsed || mobile) ? (
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full" />
                 ) : (
@@ -173,10 +173,10 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-800 truncate">
                   {user?.name || 'User'}
                 </p>
-                <p className="text-xs text-neutral truncate">
+                <p className="text-xs text-gray-600 truncate">
                   {user?.email || 'user@company.com'}
                 </p>
               </div>

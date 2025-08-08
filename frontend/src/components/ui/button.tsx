@@ -12,14 +12,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-primary text-white hover:bg-primary-700 focus-visible:ring-primary',
+        default: 'bg-primary text-white hover:bg-blue-700 focus-visible:ring-primary',
         destructive: 'bg-red-500 text-white hover:bg-red-600 focus-visible:ring-red-500',
-        outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus-visible:ring-primary',
-        secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500',
-        ghost: 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus-visible:ring-gray-500',
-        link: 'text-primary underline-offset-4 hover:underline focus-visible:ring-primary',
-        success: 'bg-success text-white hover:bg-success-600 focus-visible:ring-success',
-        warning: 'bg-highlight text-white hover:bg-highlight-600 focus-visible:ring-highlight'
+        outline: 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 hover:border-gray-400 hover:text-blue-700 focus-visible:ring-primary',
+        secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-blue-700 focus-visible:ring-gray-500',
+        ghost: 'text-gray-700 hover:bg-gray-100 hover:text-blue-700 focus-visible:ring-gray-500',
+        link: 'text-primary underline-offset-4 hover:underline hover:text-blue-700 focus-visible:ring-primary',
+        success: 'bg-success text-white hover:bg-green-600 focus-visible:ring-success',
+        warning: 'bg-highlight text-white hover:bg-orange-600 focus-visible:ring-highlight'
       },
       size: {
         default: 'h-10 px-4 py-2',

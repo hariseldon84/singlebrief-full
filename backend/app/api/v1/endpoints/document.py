@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.integration_hub import integration_hub_service
 from app.auth.dependencies import get_current_organization, get_current_user
 from app.core.database import get_db_session
-from app.integrations.document_integration import document_service
+from app.integrations.document_integration import document_integration_service
 from app.models.user import Organization, User
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ async def setup_document_integration(
 
         # Register connector if not already registered
         try:
-            connector_id = await document_service.register_document_connector(
+            connector_id = await document_integration_service.register_document_connector(
                 request.service_type
             )
         except Exception:
@@ -159,9 +159,9 @@ async def setup_document_integration(
                 "file_watching",
             ],
             scopes=(
-                document_service.gdrive_scopes
+                document_integration_service.gdrive_scopes
                 if request.service_type == "gdrive"
-                else document_service.onedrive_scopes
+                else document_integration_service.onedrive_scopes
             ),
             status="pending_auth",
         )
@@ -203,7 +203,7 @@ async def initiate_document_oauth(
     permissions to their documents.
     """
     try:
-        authorization_url = await document_service.initiate_oauth_flow(
+        authorization_url = await document_integration_service.initiate_oauth_flow(
             organization_id=current_org.id,
             user_id=current_user.id,
             service_type=request.service_type,
@@ -247,7 +247,7 @@ async def complete_document_oauth(
     securely for the organization.
     """
     try:
-        oauth_token = await document_service.complete_oauth_flow(
+        oauth_token = await document_integration_service.complete_oauth_flow(
             organization_id=current_org.id,
             user_id=current_user.id,
             service_type=request.service_type,
@@ -304,7 +304,7 @@ async def fetch_documents(
             )
 
         # Fetch files from service
-        files = await document_service.fetch_files(
+        files = await document_integration_service.fetch_files(
             integration_id=integration.id,
             service_type=query.service_type,
             query=query.query,
@@ -360,7 +360,7 @@ async def extract_document_content(
             )
 
         # Extract file content
-        content = await document_service.extract_file_content(
+        content = await document_integration_service.extract_file_content(
             integration_id=integration.id,
             service_type=request.service_type,
             file_id=request.file_id,
@@ -412,7 +412,7 @@ async def score_document_relevance(
             )
 
         # Score document relevance
-        relevance_scores = await document_service.score_document_relevance(
+        relevance_scores = await document_integration_service.score_document_relevance(
             integration_id=integration.id,
             service_type=request.service_type,
             file_ids=request.file_ids,
@@ -466,7 +466,7 @@ async def setup_change_tracking(
             )
 
         # Setup change tracking
-        change_config = await document_service.setup_change_tracking(
+        change_config = await document_integration_service.setup_change_tracking(
             integration_id=integration.id,
             service_type=service_type,
             webhook_url=webhook_url,
@@ -504,7 +504,7 @@ async def process_change_webhook(
         headers = dict(request.headers)
 
         # Process the webhook event
-        result = await document_service.process_change_webhook(
+        result = await document_integration_service.process_change_webhook(
             service_type=service_type, event_data=event_data, headers=headers
         )
 

@@ -1,0 +1,178 @@
+{
+  "timestamp": "2025-08-07T16:08:24.177490",
+  "overall_status": "PASS",
+  "tests_passed": 5,
+  "tests_failed": 1,
+  "test_details": [
+    {
+      "test_name": "Application Configuration - Comprehensive",
+      "status": "FAIL",
+      "timestamp": "2025-08-07T16:08:24.177668",
+      "details": {
+        "environment_config": {
+          "value": "development",
+          "valid": true,
+          "recommended": true
+        },
+        "debug_config": {
+          "value": "false",
+          "valid": true,
+          "secure": true
+        },
+        "security_config": {
+          "configured": true,
+          "length": 44,
+          "secure": true,
+          "base64_encoded": true
+        },
+        "api_config": {
+          "value": "v1",
+          "valid": true,
+          "current": true
+        },
+        "frontend_config": {
+          "api_url": "http://localhost:8000",
+          "app_url": "http://localhost:3000",
+          "api_url_configured": true,
+          "app_url_configured": true,
+          "localhost_development": true
+        },
+        "limits_config": {
+          "max_file_size_mb": 10.0,
+          "session_timeout_minutes": 60,
+          "rate_limit_per_minute": 60,
+          "file_size_reasonable": true,
+          "session_timeout_reasonable": true,
+          "rate_limit_reasonable": true
+        },
+        "logging_config": {
+          "log_level": "INFO",
+          "valid_level": true,
+          "production_appropriate": true
+        },
+        "configuration_score": "4/7",
+        "overall_health": "Needs Attention",
+        "error": "Only 4/7 configurations are properly set"
+      }
+    },
+    {
+      "test_name": "JWT Configuration - Enhanced",
+      "status": "PASS",
+      "timestamp": "2025-08-07T16:08:24.178822",
+      "details": {
+        "jwt_secret_configured": true,
+        "jwt_secret_length": 44,
+        "algorithm": "HS256",
+        "access_token_expiry_minutes": 30,
+        "access_token_created": true,
+        "access_token_verified": true,
+        "refresh_token_created": true,
+        "refresh_token_verified": true,
+        "email_verification_token_created": true,
+        "email_verification_verified": true,
+        "payload_structure": {
+          "user_identification": [
+            "sub",
+            "email"
+          ],
+          "authorization": [
+            "role",
+            "permissions"
+          ],
+          "organization": [
+            "organization_id",
+            "team_ids"
+          ],
+          "token_metadata": [
+            "type",
+            "exp",
+            "iat"
+          ]
+        },
+        "security_features": {
+          "algorithm_secure": true,
+          "secret_length_adequate": true,
+          "expiry_reasonable": true
+        }
+      }
+    },
+    {
+      "test_name": "Vector Database (Pinecone) - Comprehensive",
+      "status": "PASS",
+      "timestamp": "2025-08-07T16:08:28.030458",
+      "details": {
+        "api_key_configured": true,
+        "environment": "us-east-1",
+        "available_indexes": [
+          "singlebrief"
+        ],
+        "embedding_dimensions": 1536,
+        "embedding_model": "text-embedding-ada-002",
+        "pinecone_api_status": "Connected",
+        "test_embedding_sample": [
+          -0.023058899,
+          0.0018832613,
+          -0.012413609,
+          -0.020597396,
+          -0.033640526
+        ]
+      }
+    },
+    {
+      "test_name": "Integration API Keys (Google, Slack, Microsoft)",
+      "status": "PASS",
+      "timestamp": "2025-08-07T16:08:28.966364",
+      "details": {
+        "google_oauth": {
+          "client_id_configured": true,
+          "client_secret_configured": true,
+          "oauth_endpoint_accessible": true,
+          "client_id_format": "Valid Google Client ID format"
+        },
+        "slack_api": {
+          "client_id_configured": true,
+          "client_secret_configured": true,
+          "api_endpoint_accessible": true,
+          "client_id_format": "Valid Slack Client ID format"
+        },
+        "microsoft_graph": {
+          "client_id_configured": true,
+          "client_secret_configured": true,
+          "graph_api_accessible": true,
+          "client_id_format": "Valid Microsoft Client ID format"
+        },
+        "configured_services_count": 3,
+        "total_services": 3
+      }
+    },
+    {
+      "test_name": "Sentry Monitoring Configuration",
+      "status": "PASS",
+      "timestamp": "2025-08-07T16:08:29.390181",
+      "details": {
+        "dsn_configured": true,
+        "dsn_format_valid": true,
+        "public_key_present": true,
+        "host": "o4509802101014528.ingest.us.sentry.io",
+        "project_id": "4509802116218880",
+        "sentry_api_accessible": false,
+        "dsn_sample": "https://***@o4509802101014528.ingest.us.sentry.io/4509802116218880"
+      }
+    },
+    {
+      "test_name": "Email Configuration (Resend SMTP)",
+      "status": "PASS",
+      "timestamp": "2025-08-07T16:08:32.407048",
+      "details": {
+        "smtp_host": "smtp.resend.com",
+        "smtp_port": 465,
+        "smtp_user": "resend",
+        "smtp_password_configured": true,
+        "connection_successful": true,
+        "authentication_successful": true,
+        "service_provider": "Resend",
+        "security": "SSL"
+      }
+    }
+  ]
+}

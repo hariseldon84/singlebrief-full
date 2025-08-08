@@ -107,7 +107,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
       {/* Suggestions Dropdown */}
       {showSuggestions && (
         <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-          <div className="p-2 border-b border-gray-100">
+          <div className="p-2 border-b border-gray-200">
             <div className="flex items-center text-sm text-gray-600">
               <Sparkles className="h-4 w-4 mr-2" />
               Quick suggestions
@@ -118,7 +118,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
               <button
                 key={index}
                 onClick={() => insertSuggestion(suggestion)}
-                className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 hover:text-blue-700 transition-colors"
               >
                 {suggestion}
               </button>
@@ -132,10 +132,10 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
         'border rounded-lg transition-all duration-200',
         isFocused 
           ? 'border-primary ring-2 ring-primary ring-opacity-20' 
-          : 'border-gray-200 hover:border-gray-300'
+          : 'border-gray-300 hover:border-gray-400'
       )}>
         {/* Toolbar */}
-        <div className="flex items-center justify-between p-3 border-b border-gray-100">
+        <div className="flex items-center justify-between p-3 border-b border-border">
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -143,7 +143,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
               onClick={() => setShowSuggestions(!showSuggestions)}
               className={cn(
                 'transition-colors',
-                showSuggestions ? 'text-primary bg-primary-50' : 'text-gray-400 hover:text-gray-600'
+                showSuggestions ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'
               )}
               title="Quick suggestions"
             >
@@ -152,7 +152,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-gray-400 hover:text-gray-600"
+              className="text-muted-foreground hover:text-foreground"
               title="Attach file"
             >
               <Paperclip className="h-4 w-4" />
@@ -160,7 +160,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
             <Button
               variant="ghost"
               size="icon-sm"
-              className="text-gray-400 hover:text-gray-600"
+              className="text-muted-foreground hover:text-foreground"
               title="Mention team member"
             >
               <AtSign className="h-4 w-4" />
@@ -174,7 +174,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
               onClick={handleVoiceInput}
               className={cn(
                 'transition-colors',
-                isListening ? 'text-highlight animate-pulse' : 'text-gray-400 hover:text-gray-600'
+                isListening ? 'text-highlight animate-pulse' : 'text-muted-foreground hover:text-foreground'
               )}
               title="Voice input"
             >
@@ -196,7 +196,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder="Ask me anything about your team, projects, or recent activity..."
-            className="w-full p-4 resize-none border-none focus:outline-none text-gray-900 placeholder-gray-500"
+            className="w-full p-4 resize-none border-none focus:outline-none text-foreground placeholder:text-muted-foreground bg-transparent"
             rows={1}
             style={{ minHeight: '60px' }}
           />
@@ -216,7 +216,7 @@ export function QueryInput({ query, setQuery, onSubmit, isProcessing }: QueryInp
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-2 bg-gray-50 text-xs text-gray-500">
+        <div className="flex items-center justify-between px-4 py-2 bg-muted text-xs text-muted-foreground">
           <div className="flex items-center space-x-4">
             <span>Press Enter to send, Shift+Enter for new line</span>
           </div>

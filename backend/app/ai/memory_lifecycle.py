@@ -12,7 +12,7 @@ from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session
 
 from app.ai.memory_service import memory_service
-from app.core.database import get_db
+from app.core.database import get_db_session
 from app.models.memory import (Conversation, ConversationMessage, Decision,
                                MemoryEmbedding, TeamMemory, UserMemory)
 

@@ -73,7 +73,7 @@ export function DailyBriefCard() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Daily Intelligence Brief</h2>
             <p className="text-sm text-neutral mt-1">
-              Generated {formatRelativeTime(briefData.generated_at)} • Updated {formatRelativeTime(briefData.updated_at)}
+              Generated {formatRelativeTime(new Date(briefData.generated_at))} • Updated {formatRelativeTime(new Date(briefData.updated_at))}
             </p>
           </div>
           <div className="flex items-center space-x-3">

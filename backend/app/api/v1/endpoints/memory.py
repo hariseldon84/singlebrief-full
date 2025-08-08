@@ -13,8 +13,8 @@ from app.ai.context_retrieval import context_retrieval_service
 from app.ai.memory_lifecycle import memory_lifecycle_manager
 from app.ai.memory_service import memory_service
 from app.auth.dependencies import get_current_user
-from app.core.database import get_db
-from app.models.auth import User
+from app.core.database import get_db_session
+from app.models.user import User
 
 router = APIRouter()
 
@@ -69,7 +69,7 @@ class CreateUserMemoryRequest(BaseModel):
 async def search_memories(
     request: MemorySearchRequest,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Search for relevant memories using semantic similarity"""
     try:
@@ -101,7 +101,7 @@ async def search_memories(
 async def get_context(
     request: ContextRetrievalRequest,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Retrieve comprehensive cross-session context for a query"""
     try:
@@ -129,7 +129,7 @@ async def contextual_memory_search(
     context_filters: Optional[Dict[str, Any]] = Body(None, embed=True),
     limit: int = Query(20, ge=1, le=50),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Enhanced memory search with contextual filtering"""
     try:
@@ -152,7 +152,7 @@ async def contextual_memory_search(
 async def create_user_memory(
     request: CreateUserMemoryRequest,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Create a new user memory with vector embedding"""
     try:
@@ -182,7 +182,7 @@ async def create_user_memory(
 async def manage_memory_lifecycle(
     request: MemoryLifecycleRequest,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Manage memory lifecycle operations"""
     try:
@@ -222,7 +222,7 @@ async def get_memory_usage_report(
         None, description="Organization ID for scoped report"
     ),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Generate comprehensive memory usage report"""
     try:
@@ -248,7 +248,7 @@ async def get_conversation_context(
     query: str = Query(..., description="Query for context generation"),
     max_items: int = Query(5, ge=1, le=20, description="Maximum context items"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Get relevant conversation context for a user query"""
     try:
@@ -273,7 +273,7 @@ async def get_conversation_context(
 async def get_memory_analytics(
     days: int = Query(30, ge=1, le=365, description="Number of days for analysis"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Get memory analytics and patterns for the current user"""
     try:
@@ -295,7 +295,7 @@ async def delete_memory(
         ..., description="Memory type: user_memory or team_memory"
     ),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Delete a memory and its associated embedding"""
     try:
@@ -320,7 +320,7 @@ async def update_memory_embedding(
         ..., description="Memory type: user_memory or team_memory"
     ),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
 ):
     """Update vector embedding for a memory"""
     try:

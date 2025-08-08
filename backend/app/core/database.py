@@ -17,11 +17,19 @@ logger = structlog.get_logger(__name__)
 Base = declarative_base()
 
 # Create async engine
+database_url = settings.DATABASE_URL_COMPUTED.replace("postgresql://", "postgresql+asyncpg://")
+
+# Add SSL configuration for cloud databases (like Neon)
+connect_args = {}
+if "neon.tech" in database_url or "amazonaws.com" in database_url:
+    connect_args = {"ssl": "require"}
+
 engine = create_async_engine(
-    settings.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://"),
+    database_url,
     echo=settings.ENVIRONMENT == "development",
     future=True,
     poolclass=NullPool if settings.ENVIRONMENT == "test" else None,
+    connect_args=connect_args,
 )
 
 # Create async session factory
@@ -30,7 +38,7 @@ async_session_factory = sessionmaker(
 )
 
 # Redis connection
-redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
+redis_client = redis.from_url(settings.REDIS_URL_COMPUTED, decode_responses=True)
 
 async def get_db_session() -> AsyncSession:
     """Get database session"""

@@ -134,7 +134,7 @@ class GeneratedBrief:
             "generated_at": self.generated_at.isoformat(),
             "format": self.format.value,
             "content_hash": self.content_hash,
-            "metadata": self.metadata,
+            "metadata": self.generation_metadata,
         }
 
 class BriefGenerationService:
@@ -1147,7 +1147,7 @@ class BriefGenerationService:
                 "user_id": brief.user_id,
                 "organization_id": brief.organization_id,
                 "sections": [section.to_dict() for section in brief.sections],
-                "metadata": brief.metadata,
+                "metadata": brief.generation_metadata,
             }
 
             # Render template

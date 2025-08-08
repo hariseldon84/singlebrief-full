@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db_session
 from app.core.security import TokenData, verify_token
-from app.models.auth import LoginAttempt, RefreshToken
+from app.models.auth import LoginAttempt, AuthUserSession
 from app.models.user import Organization, User, UserRole
 
 logger = structlog.get_logger(__name__)
@@ -148,10 +148,9 @@ async def verify_refresh_token(
 
         # Check if refresh token exists and is valid
         result = await db.execute(
-            select(RefreshToken).where(
-                RefreshToken.user_id == token_data.user_id,
-                RefreshToken.is_active == True,
-                RefreshToken.is_revoked == False,
+            select(AuthUserSession).where(
+                AuthUserSession.user_id == token_data.user_id,
+                AuthUserSession.is_revoked == False,
             )
         )
         db_token = result.scalar_one_or_none()

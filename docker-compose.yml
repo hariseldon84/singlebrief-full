@@ -41,6 +41,8 @@ services:
     container_name: singlebrief_backend
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - ENVIRONMENT=development
       - POSTGRES_HOST=postgres
@@ -79,6 +81,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: singlebrief_celery_worker
+    env_file:
+      - .env
     environment:
       - ENVIRONMENT=development
       - POSTGRES_HOST=postgres
@@ -90,7 +94,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A app.workers.celery_app worker --loglevel=info
+    command: celery -A app.tasks.celery_app worker --loglevel=info
     restart: unless-stopped
 
   # Celery Flower (Task Monitoring)
@@ -101,6 +105,8 @@ services:
     container_name: singlebrief_celery_flower
     ports:
       - "5555:5555"
+    env_file:
+      - .env
     environment:
       - ENVIRONMENT=development
       - REDIS_HOST=redis
@@ -108,7 +114,7 @@ services:
       - ./backend:/app
     depends_on:
       - redis
-    command: celery -A app.workers.celery_app flower --port=5555
+    command: celery -A app.tasks.celery_app flower --port=5555
     restart: unless-stopped
     
   # Nginx Web Server

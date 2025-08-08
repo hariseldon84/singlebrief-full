@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 from celery import Task
 
 from app.ai.memory_lifecycle import memory_lifecycle_manager
-from app.core.database import get_db
+from app.core.database import get_db_session
 from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)

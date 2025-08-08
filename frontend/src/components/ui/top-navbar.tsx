@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useAppStore } from '@/lib/stores/app-store'
 import { Button } from './button'
 import { NotificationDropdown } from '../dashboard/notification-dropdown'
+import { LogoIcon } from './logo'
 
 export function TopNavbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -44,6 +45,7 @@ export function TopNavbar() {
               placeholder="Ask your team anything..."
               className={`block w-full rounded-md border pl-10 pr-12 py-2 text-sm 
                          transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1
+                         text-gray-800 placeholder-gray-500
                          ${isSearchFocused 
                            ? 'border-primary ring-primary ring-opacity-50 bg-primary-50/30' 
                            : 'border-gray-300 hover:border-gray-400 bg-white'
@@ -55,7 +57,7 @@ export function TopNavbar() {
             <button
               onClick={handleVoiceInput}
               className={`absolute inset-y-0 right-0 flex items-center pr-3 transition-colors ${
-                isListening ? 'text-highlight' : 'text-neutral hover:text-gray-600'
+                isListening ? 'text-highlight' : 'text-gray-500 hover:text-blue-700'
               }`}
               title="Voice input"
             >
@@ -72,20 +74,18 @@ export function TopNavbar() {
           {/* User Profile */}
           <div className="relative">
             <button className="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-100 transition-colors">
-              <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                 {user?.avatar ? (
                   <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full" />
                 ) : (
-                  <span className="text-sm font-medium text-primary">
-                    {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                  </span>
+                  <LogoIcon size="sm" />
                 )}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-800">
                   {user?.name || 'User'}
                 </p>
-                <p className="text-xs text-neutral">
+                <p className="text-xs text-gray-600">
                   {user?.role || 'Team Lead'}
                 </p>
               </div>

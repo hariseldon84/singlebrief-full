@@ -49,7 +49,7 @@ router = APIRouter()
 @router.post("/templates", response_model=QuestionTemplateResponse)
 async def create_question_template(
     template_data: QuestionTemplateCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new question template"""
@@ -78,7 +78,7 @@ async def get_question_templates(
     complexity: Optional[QuestionComplexity] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get question templates with optional filtering"""
@@ -98,7 +98,7 @@ async def get_question_templates(
 @router.get("/templates/{template_id}", response_model=QuestionTemplateResponse)
 async def get_question_template(
     template_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific question template"""
@@ -114,7 +114,7 @@ async def get_question_template(
 @router.put("/templates/{template_id}/optimize")
 async def optimize_template_effectiveness(
     template_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Optimize template effectiveness based on usage data"""
@@ -128,7 +128,7 @@ async def optimize_template_effectiveness(
 @router.post("/profiles", response_model=TeamMemberProfileResponse)
 async def create_team_member_profile(
     profile_data: TeamMemberProfileCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new team member profile"""
@@ -158,7 +158,7 @@ async def get_team_member_profiles(
     role: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get team member profiles with optional filtering"""
@@ -176,7 +176,7 @@ async def get_team_member_profiles(
 @router.get("/profiles/{profile_id}", response_model=TeamMemberProfileResponse)
 async def get_team_member_profile(
     profile_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific team member profile"""
@@ -193,7 +193,7 @@ async def get_team_member_profile(
 async def update_team_member_profile(
     profile_id: str,
     profile_update: TeamMemberProfileUpdate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Update a team member profile"""
@@ -218,7 +218,7 @@ async def update_team_member_profile(
 @router.post("/questions/generate", response_model=GeneratedQuestionResponse)
 async def generate_question(
     request: QuestionGenerationRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Generate a question for a specific team member"""
@@ -239,7 +239,7 @@ async def generate_question(
 )
 async def generate_batch_questions(
     request: BatchQuestionRequest,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Generate questions for multiple team members"""
@@ -263,7 +263,7 @@ async def get_questions(
     end_date: Optional[datetime] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get generated questions with filtering"""
@@ -294,7 +294,7 @@ async def get_questions(
 @router.get("/questions/{question_id}", response_model=GeneratedQuestionResponse)
 async def get_question(
     question_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific generated question"""
@@ -312,7 +312,7 @@ async def get_question(
 )
 async def generate_follow_up_question(
     question_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Generate a follow-up question based on the response to a previous question"""
@@ -344,7 +344,7 @@ async def generate_follow_up_question(
 @router.post("/responses", response_model=QuestionResponseResponse)
 async def create_question_response(
     response_data: QuestionResponseCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Create a response to a question"""
@@ -402,7 +402,7 @@ async def get_question_responses(
     status: Optional[ResponseStatus] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get question responses with filtering"""
@@ -432,7 +432,7 @@ async def get_team_insights(
     end_date: Optional[datetime] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get team insights with filtering"""
@@ -452,7 +452,7 @@ async def get_team_insights(
 @router.post("/insights/generate")
 async def generate_team_insights(
     team_id: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Generate new insights from recent team responses"""
@@ -466,7 +466,7 @@ async def generate_team_insights(
 @router.post("/feedback", response_model=InteractionFeedbackResponse)
 async def create_interaction_feedback(
     feedback_data: InteractionFeedbackCreate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Create feedback on an AI interaction"""
@@ -485,7 +485,7 @@ async def get_interaction_feedback(
     min_rating: Optional[int] = Query(None, ge=1, le=5),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get interaction feedback with filtering"""
@@ -515,7 +515,7 @@ async def get_communication_patterns(
     profile_id: Optional[str] = Query(None),
     pattern_type: Optional[str] = Query(None),
     min_effectiveness: Optional[float] = Query(None, ge=0.0, le=1.0),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get learned communication patterns"""
@@ -542,7 +542,7 @@ async def get_team_analytics(
     team_id: str,
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user),
 ):
     """Get analytics for team interrogation activities"""

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from app.ai.vector_database import vector_db_manager
-from app.core.database import get_db
+from app.core.database import get_db_session
 from app.models.memory import (Conversation, ConversationMessage, Decision,
                                MemoryEmbedding, TeamMemory, UserMemory)
 

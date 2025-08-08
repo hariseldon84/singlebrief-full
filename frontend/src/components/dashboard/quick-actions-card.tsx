@@ -1,6 +1,7 @@
 'use client'
 
 import { Brain, MessageSquare, FileText, Settings, Zap, Users } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const quickActions = [
   { 
@@ -48,6 +49,18 @@ const quickActions = [
 ]
 
 export function QuickActionsCard() {
+  const router = useRouter()
+
+  const handleActionClick = (href: string, name: string) => {
+    // Handle existing pages
+    if (href === '/query' || href === '/settings' || href === '/team' || href === '/reports' || href === '/integrations') {
+      router.push(href)
+    } else {
+      // For non-existent pages, show a placeholder alert
+      alert(`${name} feature coming soon! This will redirect to: ${href}`)
+    }
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-soft border border-gray-200 p-6">
       <div className="flex items-center space-x-2 mb-4">
@@ -59,7 +72,8 @@ export function QuickActionsCard() {
         {quickActions.map((action, index) => (
           <button
             key={index}
-            className="w-full text-left p-3 rounded-md hover:bg-gray-50 transition-all duration-200 group"
+            onClick={() => handleActionClick(action.href, action.name)}
+            className="w-full text-left p-3 rounded-md hover:bg-gray-50 transition-all duration-200 group cursor-pointer"
           >
             <div className="flex items-center space-x-3">
               <div className={`p-2 rounded-md transition-colors ${action.color}`}>

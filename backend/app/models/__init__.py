@@ -1,15 +1,16 @@
 # Import all models here for SQLAlchemy registration
-from .auth import EmailVerificationToken, PasswordResetToken, RefreshToken
+from .auth import OAuthProvider, AuthUserSession, APIKey, LoginAttempt
 from .user import Organization, Team, User, UserConsent, UserSession, UserTeam
 
 __all__ = [
     "User",
-    "Organization",
+    "Organization", 
     "Team",
     "UserTeam",
     "UserSession",
     "UserConsent",
-    "RefreshToken",
-    "PasswordResetToken",
-    "EmailVerificationToken",
+    "OAuthProvider",
+    "AuthUserSession", 
+    "APIKey",
+    "LoginAttempt",
 ]

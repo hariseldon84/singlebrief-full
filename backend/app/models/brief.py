@@ -10,7 +10,7 @@ from sqlalchemy import (JSON, Boolean, Column, DateTime, Float, ForeignKey,
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.models.base import Base
+from app.core.database import Base
 
 class BriefStatus(str, Enum):
     """Brief generation status."""
@@ -86,7 +86,7 @@ class Brief(Base):
     # Content
     content = Column(Text)  # Generated brief content
     summary = Column(Text)  # Brief summary/preview
-    metadata = Column(JSON)  # Generation metadata, sources, etc.
+    generation_metadata = Column(JSON)  # Generation metadata, sources, etc.
 
     # Template and configuration
     template_id = Column(
