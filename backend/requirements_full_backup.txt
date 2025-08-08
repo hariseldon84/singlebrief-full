@@ -11,16 +11,26 @@ psycopg2-binary==2.9.9
 asyncpg==0.29.0
 redis==5.0.1
 
-# Authentication & Security
+# Authentication & Security - Fixed compatibility
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
 pyjwt==2.8.0
 email-validator==2.1.0
 
-# Templates & Basic AI
+# AI/ML Integration - Fixed LangChain versions
 jinja2==3.1.2
 openai==1.3.7
 anthropic==0.7.7
+
+# LangChain - Compatible versions
+langchain==0.1.20
+langchain-community==0.0.38
+langchain-openai==0.0.8
+langchain-core==0.1.52
+
+# Vector Databases
+pinecone-client==3.2.2
+weaviate-client==4.5.4
 
 # Task Queue
 celery==5.3.4
