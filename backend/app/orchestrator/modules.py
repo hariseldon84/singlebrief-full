@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Protocol
 
-from langchain.tools import BaseTool
+# Temporarily commented out for dependency issues
+# from langchain.tools import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class SingleBriefModule(Protocol):
         """Get module health status"""
         ...
 
-    def get_tools(self) -> List[BaseTool]:
+    def get_tools(self) -> List[Any]:
         """Get LangChain tools this module provides"""
         ...
 
@@ -65,7 +66,7 @@ class ModuleRegistry:
     def __init__(self):
         self._modules: Dict[str, ModuleInfo] = {}
         self._capability_map: Dict[str, List[str]] = {}
-        self._tools_cache: Optional[List[BaseTool]] = None
+        self._tools_cache: Optional[List[Any]] = None
 
         # Register built-in modules
         self._register_builtin_modules()
@@ -176,7 +177,7 @@ class ModuleRegistry:
         module_info = self._modules.get(module_name)
         return module_info is not None and module_info.is_enabled
 
-    def get_available_tools(self) -> List[BaseTool]:
+    def get_available_tools(self) -> List[Any]:
         """Get all tools from enabled modules"""
         if self._tools_cache is not None:
             return self._tools_cache
@@ -253,7 +254,7 @@ class MockTeamCommsModule:
             "connections": {"slack": "connected", "email": "connected"},
         }
 
-    def get_tools(self) -> List[BaseTool]:
+    def get_tools(self) -> List[Any]:
         return []  # TODO: Implement actual tools
 
 class MockMemoryEngineModule:
@@ -299,7 +300,7 @@ class MockMemoryEngineModule:
             "vector_database": "connected",
         }
 
-    def get_tools(self) -> List[BaseTool]:
+    def get_tools(self) -> List[Any]:
         return []
 
 class MockIntegrationHubModule:
@@ -343,7 +344,7 @@ class MockIntegrationHubModule:
             "data_freshness": "current",
         }
 
-    def get_tools(self) -> List[BaseTool]:
+    def get_tools(self) -> List[Any]:
         return []
 
 class MockTrustLayerModule:
@@ -387,5 +388,5 @@ class MockTrustLayerModule:
             "confidence_engine": "online",
         }
 
-    def get_tools(self) -> List[BaseTool]:
+    def get_tools(self) -> List[Any]:
         return []

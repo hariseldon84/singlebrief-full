@@ -9,9 +9,10 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
-from langchain.output_parsers import PydanticOutputParser
-from langchain.schema import HumanMessage, SystemMessage
-from langchain_openai import ChatOpenAI
+# Temporarily commented out for dependency issues
+# from langchain.output_parsers import PydanticOutputParser
+# from langchain.schema import HumanMessage, SystemMessage
+# from langchain_openai import ChatOpenAI
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)

@@ -18,7 +18,7 @@ from sqlalchemy.orm import selectinload
 from app.core.database import get_async_session
 from app.models.memory import (Conversation, ConversationMessage, TeamMemory,
                                UserMemory)
-from app.models.user import Team, TeamMember, User
+from app.models.user import Team, User, UserTeam
 
 logger = logging.getLogger(__name__)
 
@@ -138,11 +138,11 @@ class TeamCollaborationService:
             memory = memory_result.scalar_one()
 
             # Check if user is team member
-            member_query = select(TeamMember).where(
+            member_query = select(UserTeam).where(
                 and_(
-                    TeamMember.team_id == memory.team_id,
-                    TeamMember.user_id == validating_user_id,
-                    TeamMember.is_active == True,
+                    UserTeam.team_id == memory.team_id,
+                    UserTeam.user_id == validating_user_id,
+                    UserTeam.is_active == True,
                 )
             )
             member_result = await session.execute(member_query)
@@ -159,8 +159,8 @@ class TeamCollaborationService:
                 validated_by.remove(validating_user_id)
 
             # Get total team members
-            team_size_query = select(func.count(TeamMember.id)).where(
-                and_(TeamMember.team_id == memory.team_id, TeamMember.is_active == True)
+            team_size_query = select(func.count(UserTeam.id)).where(
+                and_(UserTeam.team_id == memory.team_id, UserTeam.is_active == True)
             )
             team_size_result = await session.execute(team_size_query)
             team_size = team_size_result.scalar()
@@ -235,11 +235,11 @@ class TeamCollaborationService:
 
         try:
             # Check user's role in team
-            member_query = select(TeamMember).where(
+            member_query = select(UserTeam).where(
                 and_(
-                    TeamMember.team_id == team_id,
-                    TeamMember.user_id == user_id,
-                    TeamMember.is_active == True,
+                    UserTeam.team_id == team_id,
+                    UserTeam.user_id == user_id,
+                    UserTeam.is_active == True,
                 )
             )
             member_result = await session.execute(member_query)
@@ -407,9 +407,9 @@ class TeamCollaborationService:
         """Analyze team member participation patterns."""
         # Get team members
         members_query = (
-            select(TeamMember)
-            .options(selectinload(TeamMember.user))
-            .where(and_(TeamMember.team_id == team_id, TeamMember.is_active == True))
+            select(UserTeam)
+            .options(selectinload(UserTeam.user))
+            .where(and_(UserTeam.team_id == team_id, UserTeam.is_active == True))
         )
         members_result = await session.execute(members_query)
         team_members = members_result.scalars().all()
@@ -589,8 +589,8 @@ class TeamCollaborationService:
     ) -> Dict[str, Any]:
         """Calculate overall team health indicators."""
         # Get team size and active members
-        members_query = select(func.count(TeamMember.id)).where(
-            and_(TeamMember.team_id == team_id, TeamMember.is_active == True)
+        members_query = select(func.count(UserTeam.id)).where(
+            and_(UserTeam.team_id == team_id, UserTeam.is_active == True)
         )
         members_result = await session.execute(members_query)
         team_size = members_result.scalar()
@@ -657,11 +657,11 @@ class TeamCollaborationService:
             memory = memory_result.scalar_one()
 
             # Check if user has permission to modify
-            member_query = select(TeamMember).where(
+            member_query = select(UserTeam).where(
                 and_(
-                    TeamMember.team_id == memory.team_id,
-                    TeamMember.user_id == user_id,
-                    TeamMember.is_active == True,
+                    UserTeam.team_id == memory.team_id,
+                    UserTeam.user_id == user_id,
+                    UserTeam.is_active == True,
                 )
             )
             member_result = await session.execute(member_query)
@@ -722,11 +722,11 @@ class TeamCollaborationService:
 
         try:
             # Verify user has permission to share from source team
-            source_member_query = select(TeamMember).where(
+            source_member_query = select(UserTeam).where(
                 and_(
-                    TeamMember.team_id == source_team_id,
-                    TeamMember.user_id == requesting_user_id,
-                    TeamMember.is_active == True,
+                    UserTeam.team_id == source_team_id,
+                    UserTeam.user_id == requesting_user_id,
+                    UserTeam.is_active == True,
                 )
             )
             source_member_result = await session.execute(source_member_query)

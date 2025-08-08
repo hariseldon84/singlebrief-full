@@ -10,12 +10,13 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, BaseMessage, HumanMessage
-from langchain.tools import BaseTool
-from langchain_openai import ChatOpenAI
+# Temporarily commented out for dependency issues - will be re-enabled with compatible versions
+# from langchain.agents import AgentExecutor, create_openai_functions_agent
+# from langchain.memory import ConversationBufferWindowMemory
+# from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+# from langchain.schema import AIMessage, BaseMessage, HumanMessage
+# from langchain.tools import BaseTool
+# from langchain_openai import ChatOpenAI
 
 from app.core.config import get_settings
 from app.orchestrator.error_handler import ErrorHandler
@@ -95,30 +96,35 @@ class OrchestratorAgent:
         self.response_synthesizer = ResponseSynthesizer()
         self.error_handler = ErrorHandler()
 
-        # LLM setup
-        self.llm = ChatOpenAI(
-            model="gpt-4-turbo-preview",
-            temperature=0.1,
-            request_timeout=60,
-            max_retries=3,
-        )
+        # TODO: LLM setup - temporarily disabled for dependency issues
+        # self.llm = ChatOpenAI(
+        #     model="gpt-4-turbo-preview",
+        #     temperature=0.1,
+        #     request_timeout=60,
+        #     max_retries=3,
+        # )
 
-        # Memory for conversation context
-        self.memory = ConversationBufferWindowMemory(
-            k=10,  # Keep last 10 exchanges
-            return_messages=True,
-            memory_key="chat_history",
-        )
+        # # Memory for conversation context
+        # self.memory = ConversationBufferWindowMemory(
+        #     k=10,  # Keep last 10 exchanges
+        #     return_messages=True,
+        #     memory_key="chat_history",
+        # )
 
-        # Agent prompt template
-        self.prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", self._get_system_prompt()),
-                MessagesPlaceholder(variable_name="chat_history"),
-                ("human", "{input}"),
-                MessagesPlaceholder(variable_name="agent_scratchpad"),
-            ]
-        )
+        # # Agent prompt template
+        # self.prompt = ChatPromptTemplate.from_messages(
+        #     [
+        #         ("system", self._get_system_prompt()),
+        #         MessagesPlaceholder(variable_name="chat_history"),
+        #         ("human", "{input}"),
+        #         MessagesPlaceholder(variable_name="agent_scratchpad"),
+        #     ]
+        # )
+        
+        # Placeholder initialization
+        self.llm = None
+        self.memory = None
+        self.prompt = None
 
         # Initialize agent executor
         self.agent_executor = None
@@ -152,27 +158,31 @@ You can gather information from Slack, email, documents, calendars, and other co
     def _initialize_agent(self):
         """Initialize the LangChain agent executor"""
         try:
-            # Get available tools from module registry
-            tools = self.module_registry.get_available_tools()
+            # TODO: Temporarily disabled for dependency issues
+            # # Get available tools from module registry
+            # tools = self.module_registry.get_available_tools()
 
-            # Create agent
-            agent = create_openai_functions_agent(
-                llm=self.llm, tools=tools, prompt=self.prompt
-            )
+            # # Create agent
+            # agent = create_openai_functions_agent(
+            #     llm=self.llm, tools=tools, prompt=self.prompt
+            # )
 
-            # Create executor
-            self.agent_executor = AgentExecutor(
-                agent=agent,
-                tools=tools,
-                memory=self.memory,
-                verbose=True,
-                return_intermediate_steps=True,
-                max_iterations=5,
-                max_execution_time=60,
-                handle_parsing_errors=True,
-            )
+            # # Create executor
+            # self.agent_executor = AgentExecutor(
+            #     agent=agent,
+            #     tools=tools,
+            #     memory=self.memory,
+            #     verbose=True,
+            
+            # Placeholder - disable agent functionality temporarily
+            self.agent_executor = None
+            #     return_intermediate_steps=True,
+            #     max_iterations=5,
+            #     max_execution_time=60,
+            #     handle_parsing_errors=True,
+            # )
 
-            logger.info(f"Agent initialized with {len(tools)} tools")
+            logger.info("Agent initialization temporarily disabled")
 
         except Exception as e:
             logger.error(f"Failed to initialize agent: {e}")
