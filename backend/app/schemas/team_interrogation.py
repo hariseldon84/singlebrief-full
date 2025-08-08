@@ -7,7 +7,7 @@ Pydantic schemas for request/response validation in the Team Interrogation AI AP
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from ..models.team_interrogation import (CommunicationStyle,
                                          QuestionComplexity, QuestionType,
@@ -60,13 +60,15 @@ class TeamMemberProfileBase(BaseModel):
     cultural_context: Optional[Dict[str, Any]] = None
     communication_notes: Optional[str] = None
 
-    @validator("formality_preference")
+    @field_validator("formality_preference")
+    @classmethod
     def validate_formality_preference(cls, v):
         if not 0.0 <= v <= 1.0:
             raise ValueError("Formality preference must be between 0.0 and 1.0")
         return v
 
-    @validator("current_workload")
+    @field_validator("current_workload")
+    @classmethod
     def validate_current_workload(cls, v):
         if not 0.0 <= v <= 1.0:
             raise ValueError("Current workload must be between 0.0 and 1.0")
@@ -152,7 +154,8 @@ class QuestionResponseBase(BaseModel):
     is_anonymous: bool = False
     is_confidential: bool = False
 
-    @validator("confidence")
+    @field_validator("confidence")
+    @classmethod
     def validate_confidence(cls, v):
         if v is not None and not 0.0 <= v <= 1.0:
             raise ValueError("Confidence must be between 0.0 and 1.0")

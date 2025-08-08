@@ -5,7 +5,7 @@ Application configuration settings
 import secrets
 from typing import List, Optional
 
-from pydantic import validator
+from pydantic import field_validator, ValidationInfo
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
@@ -58,22 +58,26 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = ""
     CELERY_RESULT_BACKEND: str = ""
 
-    @validator("CELERY_BROKER_URL", pre=True)
-    def assemble_celery_broker(cls, v: Optional[str], values: dict) -> str:
+    @field_validator("CELERY_BROKER_URL", mode="before")
+    @classmethod
+    def assemble_celery_broker(cls, v: Optional[str], info: ValidationInfo) -> str:
         if isinstance(v, str) and v:
             return v
         # Use Redis URL if available, otherwise construct from components
+        values = info.data if info.data else {}
         redis_url = values.get('REDIS_URL')
         if redis_url:
             # Replace database number for Celery broker
             return redis_url.rsplit('/', 1)[0] + '/1'
         return f"redis://{values.get('REDIS_HOST')}:{values.get('REDIS_PORT')}/1"
 
-    @validator("CELERY_RESULT_BACKEND", pre=True)
-    def assemble_celery_backend(cls, v: Optional[str], values: dict) -> str:
+    @field_validator("CELERY_RESULT_BACKEND", mode="before")
+    @classmethod
+    def assemble_celery_backend(cls, v: Optional[str], info: ValidationInfo) -> str:
         if isinstance(v, str) and v:
             return v
         # Use Redis URL if available, otherwise construct from components
+        values = info.data if info.data else {}
         redis_url = values.get('REDIS_URL')
         if redis_url:
             # Replace database number for Celery backend

@@ -5,7 +5,7 @@ Authentication API schemas
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 
 from app.core.security import validate_password_strength
 
@@ -17,7 +17,8 @@ class UserRegister(BaseModel):
     full_name: str
     organization_name: Optional[str] = None
 
-    @validator("password")
+    @field_validator("password")
+    @classmethod
     def validate_password(cls, v):
         if not validate_password_strength(v):
             raise ValueError(
@@ -26,7 +27,8 @@ class UserRegister(BaseModel):
             )
         return v
 
-    @validator("full_name")
+    @field_validator("full_name")
+    @classmethod
     def validate_full_name(cls, v):
         if len(v.strip()) < 2:
             raise ValueError("Full name must be at least 2 characters")
@@ -80,7 +82,8 @@ class PasswordChange(BaseModel):
     token: str
     new_password: str
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def validate_password(cls, v):
         if not validate_password_strength(v):
             raise ValueError(
@@ -105,7 +108,8 @@ class ChangePassword(BaseModel):
     current_password: str
     new_password: str
 
-    @validator("new_password")
+    @field_validator("new_password")
+    @classmethod
     def validate_password(cls, v):
         if not validate_password_strength(v):
             raise ValueError(
@@ -146,7 +150,7 @@ class APIKeyResponse(BaseModel):
     expires_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Forward references for circular imports
 from .user import OrganizationResponse, TeamResponse, UserResponse

@@ -113,3 +113,99 @@ Wants sentiment pulse without surveys. Needs to catch burnout signs before they 
 - **💬 Team Response Compliance** (target: 85% response rate to agent prompts)
 
 ---
+
+## 🏗️ 7. Epic Overview & Feature Development
+
+### Core Platform Epics (1-7)
+The foundational system consists of 7 core epics that provide the basic SingleBrief experience:
+- **Epic 1**: Foundation Infrastructure
+- **Epic 2**: Core AI Intelligence  
+- **Epic 3**: Memory Engine
+- **Epic 4**: Data Streams Integration
+- **Epic 5**: Daily Brief Generator
+- **Epic 6**: Team Interrogation AI
+- **Epic 7**: Collaborative Team Intelligence
+
+### Advanced Intelligence Epics (8-13)
+Based on comprehensive feature research documented in [`new_brainstorming_features.md`](./new_brainstorming_features.md), SingleBrief will evolve through 6 additional epics that transform it from a team tool into a comprehensive organizational and collective intelligence platform:
+
+- **Epic 8**: [Advanced AI Intelligence System](./epics/epic-8-advanced-ai-intelligence-system.md) 🧠
+  - AI conversation memory and context tracking
+  - Smart query routing with dynamic expertise scoring  
+  - Intelligent query decomposition and multi-routing
+  - Query templates and success pattern learning
+  - Team intelligence insights and behavioral analytics
+  - Cross-team intelligence with permission management
+  - Query-driven business metrics and sentiment analysis
+  - Decision tracking and outcome management
+
+- **Epic 9**: [Organizational Intelligence Platform](./epics/epic-9-organizational-intelligence-platform.md) 📊
+  - Knowledge base auto-generation and curation
+  - Anonymous feedback and psychological safety system
+  - Polling and voting query system
+  - Intelligent escalation and chain of command
+  - Calendar intelligence and optimal timing
+
+- **Epic 10**: [Intelligent Communication Enhancement](./epics/epic-10-intelligent-communication-enhancement.md) 🎯
+  - Query composer assistant with effectiveness prediction
+  - Response quality coaching and best practice sharing
+  - Smart query coach with psychological safety enhancement
+  - Emotional intelligence layer with adaptive communication
+
+- **Epic 11**: [Advanced Analytics & Monitoring](./epics/epic-11-advanced-analytics-monitoring.md) 📊
+  - Query version control with A/B testing and performance analytics
+  - Project health monitoring with predictive analytics
+  - Advanced analytics and strategic business intelligence
+  - Organizational consciousness dashboard for C-level intelligence
+  - Memory-driven follow-ups and recursive intelligence enhancement
+
+- **Epic 12**: [Platform Architecture & Scalability](./epics/epic-12-platform-architecture-scalability.md) 🏗️
+  - Multi-tenant architecture with enterprise security
+  - Organizational intelligence graph engine
+  - Autonomous AI query agent ("Scout") for proactive intelligence
+  - Scalable infrastructure with performance optimization
+  - Cross-tenant collaboration and partnership management
+
+- **Epic 13**: [Collective Intelligence Ecosystem](./epics/epic-13-collective-intelligence-ecosystem.md) 🌐
+  - Global pulse brief - cross-organizational hive mind
+  - Intelligence marketplace - knowledge economy platform
+  - Privacy-preserving federated analytics
+  - Cross-organizational pattern recognition and early warning
+  - Collective intelligence revenue and business model
+
+- **Epic 14**: [SuperAdmin Enterprise Management Platform](./epics/epic-14-superadmin-enterprise-management-platform.md) 🏛️
+  - Comprehensive client lifecycle management and onboarding automation
+  - Advanced subscription and pricing management with real-time billing
+  - Token usage monitoring and quota management across all organizations
+  - Business intelligence platform with executive-level insights
+  - Dynamic knowledge base management for help and support content
+  - White-label deployment capabilities with custom branding
+  - Integrated billing and financial management system
+  - Support ticket system with SLA management and escalation
+  - Enterprise security, compliance, and audit management
+  - AI-powered customer success and product optimization
+  - Advanced system monitoring and performance management
+
+### Advanced Features Implementation Roadmap
+
+**Phase 1: Foundation Intelligence** (Months 1-6)
+- Core platform epics 1-7 providing basic SingleBrief functionality
+- Epic 8: Advanced AI Intelligence System
+- Epic 14: SuperAdmin Enterprise Management Platform (Foundation)
+
+**Phase 2: Organizational Intelligence** (Months 7-12)  
+- Epic 9: Organizational Intelligence Platform
+- Epic 10: Intelligent Communication Enhancement
+- Epic 14: SuperAdmin Platform (Operations & Intelligence)
+
+**Phase 3: Advanced Analytics & Scale** (Months 13-18)
+- Epic 11: Advanced Analytics & Monitoring  
+- Epic 12: Platform Architecture & Scalability
+- Epic 14: SuperAdmin Platform (Advanced Features & Optimization)
+
+**Phase 4: Collective Intelligence & Enterprise** (Months 19-24)
+- Epic 13: Collective Intelligence Ecosystem
+- Epic 14: SuperAdmin Platform (Global Scale & AI Optimization)
+- Market expansion and ecosystem growth
+
+---
