@@ -1,3 +1,11 @@
 node_modules
 .env
 .env.example
+.agent-os
+.bmad-core
+.claude
+.cursor
+.gemini
+.github
+.superdesign
+.windsurf

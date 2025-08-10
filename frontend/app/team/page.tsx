@@ -28,6 +28,13 @@ export default function TeamPage() {
             <option>Last 30 days</option>
             <option>Last 90 days</option>
           </select>
+          <a
+            href="/team-management"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-600"
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Manage Team
+          </a>
         </div>
       </div>
 

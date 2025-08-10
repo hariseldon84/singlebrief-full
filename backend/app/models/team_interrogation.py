@@ -73,7 +73,7 @@ class QuestionTemplate(Base):
     __tablename__ = "question_templates"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text)
@@ -117,12 +117,12 @@ class TeamMemberProfile(Base):
     __tablename__ = "team_member_profiles"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("users.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("users.id"), nullable=False
     )
-    team_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    team_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False, index=True)
 
     # Role and expertise
     role: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -187,13 +187,13 @@ class GeneratedQuestion(Base):
     __tablename__ = "generated_questions"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     template_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("question_templates.id")
+        UUID(as_uuid=False), ForeignKey("question_templates.id")
     )
     recipient_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("team_member_profiles.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("team_member_profiles.id"), nullable=False
     )
 
     # Question content
@@ -221,7 +221,7 @@ class GeneratedQuestion(Base):
 
     # Follow-up chain
     parent_question_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("generated_questions.id")
+        UUID(as_uuid=False), ForeignKey("generated_questions.id")
     )
     follow_up_trigger: Mapped[Optional[str]] = mapped_column(
         Text
@@ -258,13 +258,13 @@ class QuestionResponse(Base):
     __tablename__ = "question_responses"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     question_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("generated_questions.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("generated_questions.id"), nullable=False
     )
     responder_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("team_member_profiles.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("team_member_profiles.id"), nullable=False
     )
 
     # Response content
@@ -317,7 +317,7 @@ class TeamInsight(Base):
     __tablename__ = "team_insights"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     team_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
 
@@ -373,13 +373,13 @@ class InteractionFeedback(Base):
     __tablename__ = "interaction_feedback"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     question_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("generated_questions.id")
+        UUID(as_uuid=False), ForeignKey("generated_questions.id")
     )
     responder_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("team_member_profiles.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("team_member_profiles.id"), nullable=False
     )
 
     # Feedback content
@@ -435,10 +435,10 @@ class CommunicationPattern(Base):
     __tablename__ = "communication_patterns"
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default=lambda: str(uuid.uuid4())
+        UUID(as_uuid=False), primary_key=True, default=lambda: str(uuid.uuid4())
     )
     profile_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("team_member_profiles.id"), nullable=False
+        UUID(as_uuid=False), ForeignKey("team_member_profiles.id"), nullable=False
     )
 
     # Pattern identification

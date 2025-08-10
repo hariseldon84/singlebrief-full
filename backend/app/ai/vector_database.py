@@ -11,8 +11,18 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 
 import openai
-import pinecone
-import weaviate
+try:
+    from pinecone import Pinecone, ServerlessSpec
+except ImportError:
+    # Fallback for older pinecone versions
+    import pinecone
+    Pinecone = pinecone
+    ServerlessSpec = getattr(pinecone, 'ServerlessSpec', None)
+
+try:
+    import weaviate
+except ImportError:
+    weaviate = None
 
 from app.core.config import settings
 from app.models.memory import MemoryEmbedding, TeamMemory, UserMemory
@@ -327,26 +337,29 @@ class PineconeVectorDatabase(VectorDatabaseInterface):
 
     def __init__(self):
         self.index = None
+        self.pc = None
         self.embedding_generator = EmbeddingGenerator()
         self.index_name = "singlebrief-memories"
 
     async def initialize(self) -> bool:
         """Initialize Pinecone connection and index"""
         try:
-            pinecone.init(
-                api_key=settings.PINECONE_API_KEY,
-                environment=settings.PINECONE_ENVIRONMENT,
-            )
+            # Initialize Pinecone client
+            self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
 
             # Create index if it doesn't exist
-            if self.index_name not in pinecone.list_indexes():
-                pinecone.create_index(
+            if self.index_name not in [index.name for index in self.pc.list_indexes()]:
+                self.pc.create_index(
                     name=self.index_name,
                     dimension=1536,  # OpenAI embedding dimension
                     metric="cosine",
+                    spec=ServerlessSpec(
+                        cloud='aws',
+                        region='us-west-2'
+                    ) if ServerlessSpec else None
                 )
 
-            self.index = pinecone.Index(self.index_name)
+            self.index = self.pc.Index(self.index_name)
             return True
 
         except Exception as e:
@@ -482,7 +495,12 @@ class VectorDatabaseManager:
     def __init__(self, database_type: str = "weaviate"):
         self.database_type = database_type
         if database_type == "weaviate":
-            self.db = WeaviateVectorDatabase()
+            if weaviate is None:
+                logger.warning("Weaviate client not available, switching to Pinecone")
+                self.database_type = "pinecone"
+                self.db = PineconeVectorDatabase()
+            else:
+                self.db = WeaviateVectorDatabase()
         elif database_type == "pinecone":
             self.db = PineconeVectorDatabase()
         else:

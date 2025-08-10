@@ -1,11 +1,22 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Calendar, Clock } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 export function DashboardHeader() {
+  const [greeting, setGreeting] = useState('')
+  const [mounted, setMounted] = useState(false)
   const currentDate = new Date()
-  const greeting = getGreeting()
+
+  useEffect(() => {
+    setMounted(true)
+    setGreeting(getGreeting())
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <div className="space-y-4">

@@ -8,7 +8,7 @@ from app.api.v1.endpoints import (auth, briefs, context_response,
                                   developer_tools, document, email_calendar,
                                   memory, orchestrator, organizations,
                                   preferences, privacy, search, slack,
-                                  team_memory, teams, users)
+                                  team_management, team_memory, teams, users)
 
 api_router = APIRouter()
 
@@ -19,6 +19,7 @@ api_router.include_router(
     organizations.router, prefix="/organizations", tags=["organizations"]
 )
 api_router.include_router(teams.router, prefix="/teams", tags=["teams"])
+api_router.include_router(team_management.router, tags=["team-management"])
 api_router.include_router(
     orchestrator.router, prefix="/orchestrator", tags=["intelligence"]
 )

@@ -10,6 +10,9 @@ RUN npm install
 # Copy source code
 COPY . .
 
+# Install curl for health check (before switching to non-root user)
+RUN apk add --no-cache curl
+
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001

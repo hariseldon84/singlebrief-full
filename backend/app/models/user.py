@@ -126,6 +126,26 @@ class Organization(Base):
     brief_templates: Mapped[List["BriefTemplate"]] = relationship(
         "BriefTemplate", back_populates="organization"
     )
+    brief_schedules: Mapped[List["BriefSchedule"]] = relationship(
+        "BriefSchedule", back_populates="organization"
+    )
+    
+    # Memory relationships
+    user_preferences: Mapped[List["UserPreference"]] = relationship(
+        "UserPreference", back_populates="organization"
+    )
+    user_behavior_patterns: Mapped[List["UserBehaviorPattern"]] = relationship(
+        "UserBehaviorPattern", back_populates="organization"
+    )
+    privacy_consents: Mapped[List["PrivacyConsent"]] = relationship(
+        "PrivacyConsent", back_populates="organization"
+    )
+    data_export_requests: Mapped[List["DataExportRequest"]] = relationship(
+        "DataExportRequest", back_populates="organization"
+    )
+    retention_policies: Mapped[List["DataRetentionPolicy"]] = relationship(
+        "DataRetentionPolicy", back_populates="organization"
+    )
 
     # Integration Hub relationships
     connector_installations: Mapped[List["ConnectorInstallation"]] = relationship(
@@ -255,6 +275,24 @@ class User(Base):
     created_team_memories: Mapped[List["TeamMemory"]] = relationship(
         "TeamMemory", back_populates="created_by"
     )
+    preferences: Mapped[List["UserPreference"]] = relationship(
+        "UserPreference", back_populates="user"
+    )
+    behavior_patterns: Mapped[List["UserBehaviorPattern"]] = relationship(
+        "UserBehaviorPattern", back_populates="user"
+    )
+    privacy_consents: Mapped[List["PrivacyConsent"]] = relationship(
+        "PrivacyConsent", back_populates="user"
+    )
+    data_export_requests: Mapped[List["DataExportRequest"]] = relationship(
+        "DataExportRequest", back_populates="user"
+    )
+    retention_policies: Mapped[List["DataRetentionPolicy"]] = relationship(
+        "DataRetentionPolicy", back_populates="user"
+    )
+    team_profile: Mapped[List["TeamMemberProfile"]] = relationship(
+        "TeamMemberProfile", back_populates="user"
+    )
 
     # Integration relationships
     configured_integrations: Mapped[List["Integration"]] = relationship(
@@ -296,6 +334,12 @@ class User(Base):
     auth_sessions: Mapped[List["AuthUserSession"]] = relationship(
         "AuthUserSession", back_populates="user"
     )
+    email_verification_tokens: Mapped[List["EmailVerificationToken"]] = relationship(
+        "EmailVerificationToken", back_populates="user"
+    )
+    password_reset_tokens: Mapped[List["PasswordResetToken"]] = relationship(
+        "PasswordResetToken", back_populates="user"
+    )
     created_api_keys: Mapped[List["APIKey"]] = relationship(
         "APIKey", back_populates="creator"
     )
@@ -303,8 +347,11 @@ class User(Base):
     # Intelligence relationships
     queries: Mapped[List["Query"]] = relationship("Query", back_populates="user")
     briefs: Mapped[List["Brief"]] = relationship("Brief", back_populates="user")
-    created_brief_templates: Mapped[List["BriefTemplate"]] = relationship(
-        "BriefTemplate", back_populates="created_by"
+    brief_templates: Mapped[List["BriefTemplate"]] = relationship(
+        "BriefTemplate", back_populates="user"
+    )
+    brief_schedules: Mapped[List["BriefSchedule"]] = relationship(
+        "BriefSchedule", back_populates="user"
     )
 
     # Integration Hub relationships
