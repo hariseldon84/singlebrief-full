@@ -245,7 +245,7 @@ class GeneratedQuestion(Base):
     )
     responses = relationship("QuestionResponse", back_populates="question")
     follow_ups = relationship("GeneratedQuestion", remote_side=[parent_question_id])
-    parent = relationship("GeneratedQuestion", remote_side=[id])
+    parent = relationship("GeneratedQuestion", remote_side=[id], overlaps="follow_ups")
 
     __table_args__ = (
         Index("idx_generated_question_recipient_status", "recipient_id", "sent_at"),

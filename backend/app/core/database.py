@@ -53,6 +53,7 @@ async def get_db_session() -> AsyncSession:
 
 # Alias for compatibility
 get_async_session = get_db_session
+get_db = get_db_session
 
 async def get_redis() -> redis.Redis:
     """Get Redis connection"""

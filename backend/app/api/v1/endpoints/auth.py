@@ -98,9 +98,6 @@ async def register_user(
         email_token = EmailVerificationToken(
             user_id=user.id,
             token_hash=hash_password(verification_token),
-            email=user.email,
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
             expires_at=datetime.utcnow() + timedelta(hours=24),
         )
         db.add(email_token)
@@ -128,10 +125,7 @@ async def register_user(
         # Store refresh token
         refresh_token_record = RefreshToken(
             user_id=user.id,
-            token_hash=hash_password(refresh_token),
-            jti=str(uuid.uuid4()),
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
+            refresh_token_hash=hash_password(refresh_token),
             expires_at=datetime.utcnow() + timedelta(days=7),
         )
         db.add(refresh_token_record)
@@ -268,10 +262,7 @@ async def login_user(
         # Store refresh token
         refresh_token_record = RefreshToken(
             user_id=user.id,
-            token_hash=hash_password(refresh_token),
-            jti=str(uuid.uuid4()),
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
+            refresh_token_hash=hash_password(refresh_token),
             expires_at=datetime.utcnow() + timedelta(days=7),
         )
         db.add(refresh_token_record)
@@ -437,9 +428,6 @@ async def resend_verification_email(
         email_token = EmailVerificationToken(
             user_id=user.id,
             token_hash=hash_password(verification_token),
-            email=user.email,
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
             expires_at=datetime.utcnow() + timedelta(hours=24),
         )
         db.add(email_token)
@@ -556,10 +544,7 @@ async def oauth_callback(
         # Store refresh token
         refresh_token_record = RefreshToken(
             user_id=user.id,
-            token_hash=hash_password(refresh_token),
-            jti=str(uuid.uuid4()),
-            ip_address=get_client_ip(request),
-            user_agent=get_user_agent(request),
+            refresh_token_hash=hash_password(refresh_token),
             expires_at=datetime.utcnow() + timedelta(days=7),
         )
         db.add(refresh_token_record)

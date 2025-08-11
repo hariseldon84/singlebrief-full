@@ -25,7 +25,7 @@ class UserResponse(BaseModel):
     organization_id: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserProfile(BaseModel):
     """Extended user profile"""
@@ -47,7 +47,7 @@ class UserProfile(BaseModel):
     teams: List["TeamResponse"] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserUpdate(BaseModel):
     """User update schema"""
@@ -69,7 +69,7 @@ class OrganizationResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class OrganizationCreate(BaseModel):
     """Organization creation schema"""
@@ -98,7 +98,7 @@ class TeamResponse(BaseModel):
     member_count: Optional[int] = 0
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TeamCreate(BaseModel):
     """Team creation schema"""
@@ -141,7 +141,7 @@ class UserConsentResponse(BaseModel):
     expires_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserConsentUpdate(BaseModel):
     """User consent update"""
@@ -180,7 +180,7 @@ class UserSessionResponse(BaseModel):
     is_current: bool = False
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Forward reference resolution
 UserProfile.model_rebuild()

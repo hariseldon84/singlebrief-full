@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/lib/auth/context'
+import { authAPI } from '@/lib/auth/api'
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
@@ -14,6 +15,25 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
 
   const { login } = useAuth()
+
+  const handleOAuthLogin = async (provider: 'google' | 'microsoft') => {
+    try {
+      setIsLoading(true)
+      setError('')
+      
+      // Store provider in session storage for callback
+      sessionStorage.setItem('oauth_provider', provider)
+      
+      const redirectUri = `${window.location.origin}/auth/callback`
+      const { auth_url } = await authAPI.getOAuthUrl(provider, redirectUri)
+      
+      // Redirect to OAuth provider
+      window.location.href = auth_url
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `${provider} sign-in failed`)
+      setIsLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -159,9 +179,11 @@ export function LoginForm() {
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
+            onClick={() => handleOAuthLogin('google')}
+            disabled={isLoading}
             className="flex items-center justify-center px-4 py-2 border border-gray-300 
                      rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white 
-                     hover:bg-gray-50 transition-colors"
+                     hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -174,12 +196,17 @@ export function LoginForm() {
 
           <button
             type="button"
+            onClick={() => handleOAuthLogin('microsoft')}
+            disabled={isLoading}
             className="flex items-center justify-center px-4 py-2 border border-gray-300 
                      rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white 
-                     hover:bg-gray-50 transition-colors"
+                     hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="#00BCF2">
-              <path d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.008 1.792-4.669 4.532-4.669 1.313 0 2.686.234 2.686.234v2.953H15.83c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385C19.612 22.954 24 17.99 24 12z"/>
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+              <path fill="#f35325" d="M1 1h10v10H1z"/>
+              <path fill="#81bc06" d="M12 1h10v10H12z"/>
+              <path fill="#05a6f0" d="M1 12h10v10H1z"/>
+              <path fill="#ffba08" d="M12 12h10v10H12z"/>
             </svg>
             Microsoft
           </button>

@@ -1,5 +1,5 @@
 """
-Team Member Profile Management API Endpoints for Story 7.1
+Team Member Profile Management API Endpoints for Story 7.1 + 16.1
 
 Comprehensive API endpoints for:
 - Team member profile creation, management, search and filtering
@@ -8,6 +8,7 @@ Comprehensive API endpoints for:
 - Platform account integration and verification
 - Team hierarchy management
 - Bulk operations and CSV import
+- Clerk-native invitation system (Story 16.1)
 """
 
 import csv
@@ -18,9 +19,12 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy import select, and_, or_, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+import structlog
+from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_active_user, require_manager
 from app.core.database import get_db_session
+from app.core.config import settings
 from app.models.team_management import (
     TeamMemberProfileManagement, RoleTaxonomy, DesignationTaxonomy, 
     ExpertiseTag, TeamMemberPlatformAccount, TeamHierarchy, 
@@ -45,6 +49,102 @@ from app.schemas.team_management import (
 )
 
 router = APIRouter(prefix="/team-management", tags=["Team Management"])
+
+logger = structlog.get_logger(__name__)
+
+# Initialize Clerk client for invitations
+try:
+    from clerk_backend_api import Client as ClerkClient
+    clerk_client = ClerkClient(bearer_auth=settings.CLERK_SECRET_KEY) if hasattr(settings, 'CLERK_SECRET_KEY') else None
+except ImportError:
+    logger.warning("Clerk SDK not available - invitation features will be disabled")
+    clerk_client = None
+
+
+# =====================================================================
+# CLERK INVITATION SYSTEM (Story 16.1)
+# =====================================================================
+
+class ClerkInvitationRequest(BaseModel):
+    email: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    role: Optional[str] = None
+    redirect_url: Optional[str] = None
+
+class ClerkInvitationResponse(BaseModel):
+    success: bool
+    invitation_id: Optional[str] = None
+    invitation_url: Optional[str] = None
+    message: str
+    error: Optional[str] = None
+
+@router.post("/clerk-invitations", response_model=ClerkInvitationResponse)
+async def send_clerk_invitation(
+    invitation_data: ClerkInvitationRequest,
+    current_user: User = Depends(require_manager),
+    db: AsyncSession = Depends(get_db_session),
+):
+    """Send Clerk-native invitation to join organization"""
+    try:
+        if not clerk_client:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Clerk invitation service is not configured"
+            )
+        
+        # Get current user's organization from Clerk
+        if not current_user.organization_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User must be part of an organization to send invitations"
+            )
+        
+        # Send invitation via Clerk API
+        try:
+            invitation_response = clerk_client.organization_invitations.create(
+                organization_id=current_user.organization_id,
+                email_address=invitation_data.email,
+                inviter_user_id=current_user.clerk_user_id,
+                role=invitation_data.role or "basic_member",
+                redirect_url=invitation_data.redirect_url or f"{settings.FRONTEND_URL}/auth/callback"
+            )
+            
+            logger.info(
+                "Clerk invitation sent successfully",
+                email=invitation_data.email,
+                organization_id=current_user.organization_id,
+                invitation_id=invitation_response.id
+            )
+            
+            return ClerkInvitationResponse(
+                success=True,
+                invitation_id=invitation_response.id,
+                invitation_url=invitation_response.url,
+                message=f"Invitation sent successfully to {invitation_data.email}"
+            )
+            
+        except Exception as clerk_error:
+            logger.error(
+                "Clerk invitation failed",
+                error=str(clerk_error),
+                email=invitation_data.email
+            )
+            
+            return ClerkInvitationResponse(
+                success=False,
+                message="Failed to send invitation via Clerk",
+                error=str(clerk_error)
+            )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Invitation endpoint error", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process invitation: {str(e)}"
+        )
 
 
 # =====================================================================

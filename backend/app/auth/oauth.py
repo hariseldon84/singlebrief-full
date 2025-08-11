@@ -4,6 +4,7 @@ OAuth 2.0 integration for Google and Microsoft
 
 import secrets
 from typing import Any, Dict, Optional
+from urllib.parse import urlencode
 
 import httpx
 import structlog
@@ -36,6 +37,9 @@ class GoogleOAuth(OAuthProvider):
     """Google OAuth 2.0 provider"""
 
     def __init__(self):
+        if not settings.GOOGLE_CLIENT_ID or not settings.GOOGLE_CLIENT_SECRET:
+            raise ValueError("Google OAuth credentials not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.")
+        
         super().__init__(
             client_id=settings.GOOGLE_CLIENT_ID,
             client_secret=settings.GOOGLE_CLIENT_SECRET,
@@ -68,7 +72,7 @@ class GoogleOAuth(OAuthProvider):
             "prompt": "consent",  # Force consent for refresh token
         }
 
-        query_string = "&".join([f"{k}={v}" for k, v in params.items()])
+        query_string = urlencode(params)
         return f"{self.auth_url}?{query_string}"
 
     async def exchange_code(self, code: str, redirect_uri: str) -> Dict[str, Any]:
@@ -134,6 +138,9 @@ class MicrosoftOAuth(OAuthProvider):
     """Microsoft OAuth 2.0 provider"""
 
     def __init__(self):
+        if not settings.MICROSOFT_CLIENT_ID or not settings.MICROSOFT_CLIENT_SECRET:
+            raise ValueError("Microsoft OAuth credentials not configured. Please set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET environment variables.")
+        
         super().__init__(
             client_id=settings.MICROSOFT_CLIENT_ID,
             client_secret=settings.MICROSOFT_CLIENT_SECRET,
@@ -171,7 +178,7 @@ class MicrosoftOAuth(OAuthProvider):
             "response_mode": "query",
         }
 
-        query_string = "&".join([f"{k}={v}" for k, v in params.items()])
+        query_string = urlencode(params)
         return f"{self.auth_url}?{query_string}"
 
     async def exchange_code(self, code: str, redirect_uri: str) -> Dict[str, Any]:
@@ -235,13 +242,23 @@ class MicrosoftOAuth(OAuthProvider):
                     detail="Failed to refresh token",
                 )
 
-# OAuth provider instances
-google_oauth = GoogleOAuth()
-microsoft_oauth = MicrosoftOAuth()
+# OAuth provider instances - lazy loading
+_providers = {}
 
 async def get_oauth_provider(provider: str) -> OAuthProvider:
     """Get OAuth provider by name"""
-    providers = {"google": google_oauth, "microsoft": microsoft_oauth}
+    if provider not in _providers:
+        if provider == "google":
+            _providers[provider] = GoogleOAuth()
+        elif provider == "microsoft":
+            _providers[provider] = MicrosoftOAuth()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported OAuth provider: {provider}",
+            )
+    
+    providers = _providers
 
     if provider not in providers:
         raise HTTPException(

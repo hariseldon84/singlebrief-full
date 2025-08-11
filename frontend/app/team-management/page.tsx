@@ -3,6 +3,9 @@
 import React, { useState } from 'react'
 import { TeamMemberList } from '../../src/components/team-management/team-member-list'
 import { TeamMemberForm } from '../../src/components/team-management/team-member-form'
+import { useClerkOrganization } from '../../src/hooks/use-clerk-organization'
+import { OrganizationSwitcher } from '@clerk/nextjs'
+import { useAuth } from '@clerk/nextjs'
 
 interface TeamMember {
   id: string
@@ -36,14 +39,16 @@ interface TeamMember {
 }
 
 export default function TeamManagementPage() {
+  const { organization, user, isLoaded } = useClerkOrganization()
+  const { getToken } = useAuth()
   const [showMemberForm, setShowMemberForm] = useState(false)
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null)
   const [currentTeamId] = useState(() => {
-    // For now, get the organization ID and use a default team structure
-    const userStr = localStorage.getItem('sb_user')
-    const user = userStr ? JSON.parse(userStr) : null
-    return user?.organization_id || 'default-team-id'
+    // Use the organization ID from Clerk
+    return organization?.id || 'default-team-id'
   })
+
+  // Remove client-side redirect as AppLayoutWrapper handles this
 
   const handleCreateMember = () => {
     setEditingMember(null)
@@ -82,10 +87,8 @@ export default function TeamManagementPage() {
 
   const handleSaveMember = async (memberData: any) => {
     try {
-      // Get authentication token
-      const tokensStr = localStorage.getItem('sb_tokens')
-      const tokens = tokensStr ? JSON.parse(tokensStr) : null
-      const accessToken = tokens?.access_token
+      // Get authentication token from Clerk
+      const accessToken = await getToken()
 
       if (!accessToken) {
         throw new Error('No authentication token found. Please log in again.')
@@ -111,6 +114,41 @@ export default function TeamManagementPage() {
       })
 
       if (response.ok) {
+        const savedMember = await response.json()
+        
+        // Send Clerk invitation if requested and this is a new member
+        if (!editingMember && memberData.send_invitation) {
+          try {
+            const invitationResponse = await fetch('/api/v1/team-management/clerk-invitations', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+              },
+              body: JSON.stringify({
+                email: memberData.email,
+                first_name: memberData.name.split(' ')[0],
+                last_name: memberData.name.split(' ').slice(1).join(' '),
+                role: 'basic_member',
+                redirect_url: `${window.location.origin}/auth/callback`
+              })
+            })
+
+            const inviteResult = await invitationResponse.json()
+            
+            if (inviteResult.success) {
+              alert(`Team member added and Clerk invitation sent to ${memberData.email}`)
+            } else {
+              alert(`Team member added but Clerk invitation failed: ${inviteResult.error || 'Unknown error'}`)
+            }
+          } catch (inviteError) {
+            console.error('Failed to send Clerk invitation:', inviteError)
+            alert(`Team member added but Clerk invitation failed to send to ${memberData.email}`)
+          }
+        } else {
+          alert(editingMember ? 'Team member updated successfully' : 'Team member added successfully')
+        }
+        
         setShowMemberForm(false)
         setEditingMember(null)
         // Refresh the list - you would typically use a state management solution
@@ -126,7 +164,8 @@ export default function TeamManagementPage() {
       }
     } catch (error) {
       console.error('Error saving team member:', error)
-      alert(`Failed to save team member: ${error.message}`)
+      const message = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to save team member: ${message}`)
     }
   }
 
@@ -135,23 +174,50 @@ export default function TeamManagementPage() {
     setEditingMember(null)
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <TeamMemberList 
-          onAddMember={handleCreateMember}
-          onEditMember={handleEditMember}
-        />
-        
-        <TeamMemberForm
-          isOpen={showMemberForm}
-          onClose={handleCloseForm}
-          onSave={handleSaveMember}
-          member={editingMember ? convertToFormData(editingMember) : undefined}
-          teamId={currentTeamId}
-          isEditing={!!editingMember}
-        />
+  // Show loading while organization data is being loaded
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading team data...</p>
+        </div>
       </div>
+    )
+  }
+
+  // If no organization, show organization switcher
+  if (!organization) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <h1 className="text-xl font-bold text-gray-900 mb-4">Create an Organization</h1>
+          <p className="text-gray-600 mb-6">You need to create or join an organization to manage team members.</p>
+          <OrganizationSwitcher 
+            createOrganizationMode="navigation"
+            createOrganizationUrl="/auth/create-organization"
+            afterCreateOrganizationUrl="/team-management"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <TeamMemberList 
+        onAddMember={handleCreateMember}
+        onEditMember={handleEditMember}
+      />
+      
+      <TeamMemberForm
+        isOpen={showMemberForm}
+        onClose={handleCloseForm}
+        onSave={handleSaveMember}
+        member={editingMember ? convertToFormData(editingMember) : undefined}
+        teamId={currentTeamId}
+        isEditing={!!editingMember}
+      />
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { X, Save, User, MapPin, Clock, Mail, Phone, Tag } from 'lucide-react'
+import { X, Save, User, MapPin, Clock, Mail, Phone, Tag, Send } from 'lucide-react'
 
 interface ExpertiseTag {
   id: string
@@ -50,6 +50,10 @@ interface TeamMemberFormData {
   location?: string
   timezone?: string
   
+  // Skills and experience
+  skills_summary?: string
+  years_experience?: number
+  
   // Contact information
   work_phone?: string
   mobile_phone?: string
@@ -79,6 +83,10 @@ interface TeamMemberFormData {
   
   // Platform accounts
   platform_accounts: PlatformAccount[]
+  
+  // Invitation settings
+  send_invitation?: boolean
+  invitation_message?: string
 }
 
 interface TeamMemberFormProps {
@@ -103,7 +111,7 @@ export function TeamMemberForm({
     email: '',
     team_id: teamId,
     role: '',
-    status: 'active',
+    status: 'pending_invitation',
     current_workload: 0.5,
     query_contact_preference: 'in_app',
     urgent_contact_preference: 'email',
@@ -111,6 +119,8 @@ export function TeamMemberForm({
     working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
     expertise_tags: [],
     platform_accounts: [],
+    send_invitation: true,
+    invitation_message: '',
     ...member
   })
 
@@ -180,7 +190,9 @@ export function TeamMemberForm({
       
       const submissionData = {
         ...formData,
-        expertise_tags: expertiseTags
+        expertise_tags: expertiseTags,
+        // Set status to pending_invitation if invitation is being sent
+        status: formData.send_invitation ? 'pending_invitation' : formData.status
       }
       
       onSave(submissionData)
@@ -203,9 +215,10 @@ export function TeamMemberForm({
   const addPlatformAccount = (type: 'slack' | 'teams' | 'email') => {
     const newAccount: PlatformAccount = {
       platform_type: type,
-      platform_user_id: '',
-      platform_username: '',
-      platform_email: type === 'email' ? '' : undefined
+      platform_user_id: type === 'email' ? '' : `${type}-user-id`,
+      platform_username: type === 'email' ? undefined : '',
+      platform_email: type === 'email' ? '' : undefined,
+      workspace_name: type === 'email' ? undefined : ''
     }
     
     setFormData(prev => ({
@@ -236,7 +249,8 @@ export function TeamMemberForm({
     { id: 'basic', name: 'Basic Info', icon: User },
     { id: 'contact', name: 'Contact & Preferences', icon: Mail },
     { id: 'skills', name: 'Skills & Tags', icon: Tag },
-    { id: 'platforms', name: 'Platform Accounts', icon: Phone }
+    { id: 'platforms', name: 'Platform Accounts', icon: Phone },
+    { id: 'invitation', name: 'Invitation', icon: Send }
   ]
 
   return (
@@ -336,7 +350,7 @@ export function TeamMemberForm({
                   {/* Role */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Role <span className="text-red-500">*</span>
+                      Role / Key Activities <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -344,7 +358,7 @@ export function TeamMemberForm({
                       value={formData.role}
                       onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
-                      placeholder="Enter role (e.g. Frontend Developer, Product Manager)"
+                      placeholder="e.g. To provide critical issues in frontend, To give timelines for UI etc."
                     />
                   </div>
 
@@ -485,11 +499,13 @@ export function TeamMemberForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, query_contact_preference: e.target.value as any }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
-                      <option value="in_app">In App</option>
-                      <option value="email">Email</option>
-                      <option value="slack">Slack</option>
-                      <option value="teams">Teams</option>
+                      <option value="in_app">In App (Primary)</option>
+                      <option value="slack">Slack (Notification)</option>
+                      <option value="teams">Teams (Notification)</option>
                     </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      All intelligence responses happen in-app. External platforms are for notifications only.
+                    </p>
                   </div>
 
                   <div>
@@ -501,11 +517,14 @@ export function TeamMemberForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, urgent_contact_preference: e.target.value as any }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
-                      <option value="in_app">In App</option>
-                      <option value="email">Email</option>
-                      <option value="slack">Slack</option>
-                      <option value="teams">Teams</option>
+                      <option value="in_app">In App (Primary)</option>
+                      <option value="email">Email (Notification)</option>
+                      <option value="slack">Slack (Notification)</option>
+                      <option value="teams">Teams (Notification)</option>
                     </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Urgent notifications can include email, but responses must be in-app.
+                    </p>
                   </div>
 
                   <div>
@@ -517,11 +536,14 @@ export function TeamMemberForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, notification_preference: e.target.value as any }))}
                       className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
                     >
-                      <option value="in_app">In App</option>
-                      <option value="email">Email</option>
-                      <option value="slack">Slack</option>
-                      <option value="teams">Teams</option>
+                      <option value="in_app">In App Only</option>
+                      <option value="email">Email + In App</option>
+                      <option value="slack">Slack + In App</option>
+                      <option value="teams">Teams + In App</option>
                     </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Controls where team members receive query notifications.
+                    </p>
                   </div>
                 </div>
 
@@ -713,79 +735,82 @@ export function TeamMemberForm({
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {account.platform_type === 'email' ? (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          User ID *
+                          Email Address *
                         </label>
                         <input
-                          type="text"
+                          type="email"
                           required
-                          value={account.platform_user_id}
-                          onChange={(e) => updatePlatformAccount(index, 'platform_user_id', e.target.value)}
+                          value={account.platform_email || ''}
+                          onChange={(e) => updatePlatformAccount(index, 'platform_email', e.target.value)}
                           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder={`${account.platform_type} user ID`}
+                          placeholder="email@example.com"
                         />
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Username
-                        </label>
-                        <input
-                          type="text"
-                          value={account.platform_username || ''}
-                          onChange={(e) => updatePlatformAccount(index, 'platform_username', e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                          placeholder={`@username`}
-                        />
-                      </div>
-
-                      {account.platform_type === 'email' && (
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Email Address
+                            User ID *
                           </label>
                           <input
-                            type="email"
-                            value={account.platform_email || ''}
-                            onChange={(e) => updatePlatformAccount(index, 'platform_email', e.target.value)}
+                            type="text"
+                            required
+                            value={account.platform_user_id}
+                            onChange={(e) => updatePlatformAccount(index, 'platform_user_id', e.target.value)}
                             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                            placeholder="email@example.com"
+                            placeholder={`${account.platform_type} user ID`}
                           />
                         </div>
-                      )}
 
-                      {(account.platform_type === 'slack' || account.platform_type === 'teams') && (
-                        <>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Workspace ID
-                            </label>
-                            <input
-                              type="text"
-                              value={account.workspace_id || ''}
-                              onChange={(e) => updatePlatformAccount(index, 'workspace_id', e.target.value)}
-                              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                              placeholder="Workspace ID"
-                            />
-                          </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Username
+                          </label>
+                          <input
+                            type="text"
+                            value={account.platform_username || ''}
+                            onChange={(e) => updatePlatformAccount(index, 'platform_username', e.target.value)}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder={`@username`}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Workspace Name
-                            </label>
-                            <input
-                              type="text"
-                              value={account.workspace_name || ''}
-                              onChange={(e) => updatePlatformAccount(index, 'workspace_name', e.target.value)}
-                              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
-                              placeholder="Workspace name"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    {(account.platform_type === 'slack' || account.platform_type === 'teams') && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {account.platform_type === 'slack' ? 'Slack Username' : 'Teams Username'} *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={account.platform_username || ''}
+                            onChange={(e) => updatePlatformAccount(index, 'platform_username', e.target.value)}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder={account.platform_type === 'slack' ? '@john.doe' : '@john.doe'}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Workspace Name *
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={account.workspace_name || ''}
+                            onChange={(e) => updatePlatformAccount(index, 'workspace_name', e.target.value)}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                            placeholder={account.platform_type === 'slack' ? 'company-workspace' : 'Company Team'}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
@@ -796,6 +821,85 @@ export function TeamMemberForm({
                     <p className="text-gray-500 mb-4">Add platform accounts to enable multi-channel communication.</p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Invitation Tab - Updated for Clerk-native invitations */}
+            {currentTab === 'invitation' && (
+              <div className="space-y-6">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <h3 className="text-sm font-medium text-green-900 mb-2">Clerk-Native Team Invitation</h3>
+                  <p className="text-sm text-green-700">
+                    Send a secure invitation via Clerk's authentication system. Team members will join your organization and participate in in-app intelligence conversations.
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <input
+                      type="checkbox"
+                      id="send_invitation"
+                      checked={formData.send_invitation || false}
+                      onChange={(e) => setFormData(prev => ({ ...prev, send_invitation: e.target.checked }))}
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    />
+                    <label htmlFor="send_invitation" className="text-sm font-medium text-gray-700">
+                      Send Clerk invitation when creating this team member
+                    </label>
+                  </div>
+                  
+                  {formData.send_invitation && (
+                    <div className="ml-7">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Custom Invitation Message (Optional)
+                      </label>
+                      <textarea
+                        value={formData.invitation_message || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, invitation_message: e.target.value }))}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-primary focus:border-transparent"
+                        placeholder="Add a personal welcome message (included in Clerk invitation email)"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        This message will be included in the Clerk-generated invitation email.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border border-green-200 rounded-lg p-4 bg-green-50">
+                  <h4 className="text-sm font-medium text-green-900 mb-3">Clerk Invitation Benefits</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <div className="h-2 w-2 bg-green-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Secure Authentication</p>
+                        <p className="text-xs text-green-600">Enterprise-grade security with OAuth integration</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="h-2 w-2 bg-green-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">In-App Intelligence Participation</p>
+                        <p className="text-xs text-green-600">Full access to chat-based intelligence conversations</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="h-2 w-2 bg-green-500 rounded-full mt-2"></div>
+                      <div>
+                        <p className="text-sm font-medium text-green-800">Automatic Organization Membership</p>
+                        <p className="text-xs text-green-600">Seamless onboarding to your team's organization</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-yellow-900 mb-2">Important Note</h4>
+                  <p className="text-xs text-yellow-700">
+                    Email-only responses have been deprecated. All team members must join the platform for intelligence participation via in-app chat.
+                  </p>
+                </div>
               </div>
             )}
 

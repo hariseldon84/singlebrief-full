@@ -76,6 +76,38 @@ class AuthAPI {
   }
 
   async login(data: LoginData): Promise<AuthResponse> {
+    // Development bypass for testing
+    if (process.env.NODE_ENV === 'development' && data.email === 'demo@singlebrief.com' && data.password === 'demo') {
+      return {
+        user: {
+          id: 'demo-user-id',
+          email: 'demo@singlebrief.com',
+          full_name: 'Demo User',
+          role: 'admin' as const,
+          is_active: true,
+          is_verified: true,
+          is_2fa_enabled: false,
+          created_at: new Date().toISOString(),
+          organization_id: 'demo-org-id'
+        },
+        tokens: {
+          access_token: 'demo-access-token',
+          refresh_token: 'demo-refresh-token',
+          token_type: 'Bearer',
+          expires_in: 3600
+        },
+        organization: {
+          id: 'demo-org-id',
+          name: 'Demo Organization',
+          slug: 'demo-org',
+          is_active: true,
+          privacy_policy_version: '1.0',
+          data_retention_days: 90,
+          created_at: new Date().toISOString()
+        }
+      }
+    }
+    
     const response = await fetch(`${this.baseUrl}/login`, {
       method: 'POST',
       headers: {

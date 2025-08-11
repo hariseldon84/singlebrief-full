@@ -1,7 +1,7 @@
 # Authentication module
 from .dependencies import (get_current_active_user, get_current_user,
                            require_role)
-from .oauth import google_oauth, microsoft_oauth
+from .oauth import get_oauth_provider
 from .permissions import PERMISSIONS, check_permission
 
 __all__ = [
@@ -10,6 +10,5 @@ __all__ = [
     "require_role",
     "check_permission",
     "PERMISSIONS",
-    "google_oauth",
-    "microsoft_oauth",
+    "get_oauth_provider",
 ]

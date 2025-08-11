@@ -1,13 +1,13 @@
 'use client'
 
 import { TrendingUp, AlertTriangle, CheckCircle, ExternalLink, MoreHorizontal } from 'lucide-react'
-import { formatRelativeTime, getConfidenceBadgeColor } from '@/lib/utils'
+import { getConfidenceBadgeColor } from '@/lib/utils'
 
 // Mock data - will be replaced with API calls
 const briefData = {
   brief_id: "brief_20241125_001",
-  generated_at: Date.now() - 10 * 60 * 1000, // 10 minutes ago (timestamp)
-  updated_at: Date.now() - 2 * 60 * 1000, // 2 minutes ago (timestamp)
+  generated_at: "10 minutes ago", // Static string to avoid hydration issues
+  updated_at: "2 minutes ago", // Static string to avoid hydration issues
   confidence_score: 87,
   sections: [
     {
@@ -73,7 +73,7 @@ export function DailyBriefCard() {
           <div>
             <h2 className="text-xl font-semibold text-gray-900">Daily Intelligence Brief</h2>
             <p className="text-sm text-neutral mt-1">
-              Generated {formatRelativeTime(new Date(briefData.generated_at))} • Updated {formatRelativeTime(new Date(briefData.updated_at))}
+              Generated {briefData.generated_at} • Updated {briefData.updated_at}
             </p>
           </div>
           <div className="flex items-center space-x-3">

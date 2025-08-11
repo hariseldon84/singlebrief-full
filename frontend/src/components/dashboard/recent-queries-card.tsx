@@ -1,30 +1,30 @@
 'use client'
 
 import { MessageSquare, Clock, TrendingUp } from 'lucide-react'
-import { formatRelativeTime, getConfidenceColor } from '@/lib/utils'
+import { getConfidenceColor } from '@/lib/utils'
 
 const recentQueries = [
   {
     question: "What's the status of the mobile app beta testing?",
-    timestamp: new Date(Date.now() - 15 * 60 * 1000),
+    timestamp: "15m ago",
     confidence: 92,
     responseCount: 3
   },
   {
     question: "Are there any blockers for the Q4 launch?",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    timestamp: "2h ago",
     confidence: 78,
     responseCount: 5
   },
   {
     question: "How are the new team members settling in?",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000),
+    timestamp: "4h ago",
     confidence: 85,
     responseCount: 2
   },
   {
     question: "What's our current server capacity utilization?",
-    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000),
+    timestamp: "6h ago",
     confidence: 95,
     responseCount: 1
   }
@@ -55,7 +55,7 @@ export function RecentQueriesCard() {
                 <div className="flex items-center space-x-3 text-neutral">
                   <div className="flex items-center space-x-1">
                     <Clock className="h-3 w-3" />
-                    <span>{formatRelativeTime(query.timestamp)}</span>
+                    <span>{query.timestamp}</span>
                   </div>
                   <div className="flex items-center space-x-1">
                     <MessageSquare className="h-3 w-3" />

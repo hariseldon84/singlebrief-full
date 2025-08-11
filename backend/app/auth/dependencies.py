@@ -195,9 +195,9 @@ async def log_login_attempt(
             email=email,
             ip_address=ip_address,
             user_agent=user_agent,
-            success=success,
-            user_id=user_id,
+            was_successful=success,
             failure_reason=failure_reason,
+            attempt_type="email_password",
         )
         db.add(login_attempt)
         await db.commit()

@@ -146,6 +146,10 @@ class Settings(BaseSettings):
     # Frontend Configuration
     NEXT_PUBLIC_API_URL: str = "http://localhost:8000"
     NEXT_PUBLIC_APP_URL: str = "http://localhost:3000"
+    
+    # Clerk Authentication
+    CLERK_SECRET_KEY: Optional[str] = None
+    CLERK_WEBHOOK_SECRET: Optional[str] = None
 
     class Config:
         env_file = "../.env"  # Look for .env in parent directory

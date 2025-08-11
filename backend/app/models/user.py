@@ -49,11 +49,16 @@ class Organization(Base):
     __tablename__ = "organizations"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    
+    # Clerk integration
+    clerk_org_id = Column(String(255), unique=True, nullable=True, index=True)
+    
     name = Column(String(200), nullable=False)
     slug = Column(String(100), unique=True, nullable=False)
     domain = Column(
         String(255), unique=True, nullable=True
     )  # Company domain for auto-assignment
+    logo_url = Column(String(500), nullable=True)  # Organization logo
 
     # Settings
     settings = Column(Text)  # JSON settings for organization
@@ -210,10 +215,14 @@ class User(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
+    # Clerk integration
+    clerk_user_id = Column(String(255), unique=True, nullable=True, index=True)
+    
     # Basic profile
     email = Column(String(255), unique=True, nullable=False, index=True)
     full_name = Column(String(200), nullable=False)
     avatar_url = Column(String(500))
+    phone = Column(String(20), nullable=True)
 
     # Authentication
     password_hash = Column(String(255))  # Nullable for OAuth-only users

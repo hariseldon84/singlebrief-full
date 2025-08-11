@@ -25,6 +25,7 @@ import { NotificationSettings } from '@/components/settings/notification-setting
 import { PrivacySettings } from '@/components/settings/privacy-settings'
 import { IntegrationSettings } from '@/components/settings/integration-settings'
 import { DataSettings } from '@/components/settings/data-settings'
+import { UpgradeButton, SubscriptionStatus } from '@/components/billing/upgrade-button'
 
 const settingsTabs = [
   {
@@ -95,10 +96,18 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Manage your account settings and preferences
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage your account settings and preferences
+            </p>
+          </div>
+          <div className="flex flex-col items-end space-y-2">
+            <SubscriptionStatus />
+            <UpgradeButton size="sm" />
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">

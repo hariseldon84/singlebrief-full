@@ -17,8 +17,6 @@ import {
   Home,
   X,
   ChevronLeft,
-  User,
-  LogOut,
   HelpCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -44,7 +42,7 @@ const secondaryNavigation = [
 
 function SidebarContent({ mobile = false }: { mobile?: boolean }) {
   const pathname = usePathname()
-  const { user, sidebarCollapsed, setSidebarCollapsed, setMobileMenuOpen } = useAppStore()
+  const { sidebarCollapsed, setSidebarCollapsed, setMobileMenuOpen } = useAppStore()
 
   const handleLinkClick = () => {
     if (mobile) {
@@ -87,7 +85,7 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-6">
+      <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
         {/* Primary Navigation */}
         <div className="space-y-1">
           {navigation.map((item) => {
@@ -157,68 +155,6 @@ function SidebarContent({ mobile = false }: { mobile?: boolean }) {
           </div>
         </div>
       </nav>
-
-      {/* User Profile Section */}
-      <div className="border-t border-gray-200 p-4">
-        {(!sidebarCollapsed || mobile) ? (
-          <div className="space-y-2">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="h-8 w-8 rounded-full" />
-                ) : (
-                  <span className="text-sm font-medium text-primary">
-                    {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {user?.name || 'User'}
-                </p>
-                <p className="text-xs text-gray-600 truncate">
-                  {user?.email || 'user@company.com'}
-                </p>
-              </div>
-            </div>
-            <div className="flex space-x-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1 justify-start h-8"
-                leftIcon={<User className="h-3 w-3" />}
-              >
-                Profile
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex-1 justify-start h-8"
-                leftIcon={<LogOut className="h-3 w-3" />}
-              >
-                Sign out
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col space-y-2">
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              title="Profile"
-            >
-              <User className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              title="Sign out"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

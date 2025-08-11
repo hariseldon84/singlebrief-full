@@ -307,9 +307,9 @@ class LoginAttempt(Base):
         nullable=False,
         comment="Type of attempt: email_password, oauth, api_key",
     )
-    failure_reason: Mapped[str] = mapped_column(
+    failure_reason: Mapped[Optional[str]] = mapped_column(
         String(100),
-        nullable=False,
+        nullable=True,
         comment="Why the attempt failed: invalid_credentials, account_locked, etc.",
     )
     was_successful: Mapped[bool] = mapped_column(
