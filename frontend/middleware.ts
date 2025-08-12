@@ -1,9 +1,42 @@
-import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export default function middleware() {
-  // Temporarily disabled - Clerk middleware causing version conflicts
-  return NextResponse.next();
-}
+// Define protected routes that require authentication
+const isProtectedRoute = createRouteMatcher([
+  '/',
+  '/team-management',
+  '/query', 
+  '/memory',
+  '/integrations',
+  '/settings',
+  '/reports',
+  '/analytics',
+  '/help',
+  '/trust',
+  '/team'
+])
+
+export default clerkMiddleware((auth, req) => {
+  const { pathname } = req.nextUrl
+
+  // Allow public access to auth pages, debug pages, etc.
+  const publicRoutes = [
+    '/signin',
+    '/signup',
+    '/auth',
+    '/working', 
+    '/simple',
+    '/debug',
+    '/test',
+    '/signout'
+  ]
+
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
+  
+  // If it's a protected route and user is not authenticated, redirect to signin
+  if (isProtectedRoute(req) && !isPublicRoute) {
+    auth().protect()
+  }
+})
 
 export const config = {
   matcher: [
@@ -12,4 +45,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-};
+}

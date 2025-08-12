@@ -11,7 +11,14 @@ export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
   const { isLoaded, userId } = useAuth()
   
   // Check if current path is an auth page or has special handling
-  const isAuthPage = pathname?.startsWith('/auth') || pathname === '/signin' || pathname === '/signup' || pathname === '/working' || pathname === '/simple' || pathname === '/debug' || pathname === '/test' || pathname === '/signout'
+  const isAuthPage = pathname?.startsWith('/auth') || 
+    pathname?.startsWith('/signin') || 
+    pathname?.startsWith('/signup') || 
+    pathname === '/working' || 
+    pathname === '/simple' || 
+    pathname === '/debug' || 
+    pathname === '/test' || 
+    pathname === '/signout'
   
   // For auth pages, render children without the main app layout
   if (isAuthPage) {
@@ -30,22 +37,8 @@ export function AppLayoutWrapper({ children }: { children: React.ReactNode }) {
     )
   }
   
-  // For non-auth pages, redirect to login if not authenticated (only after loaded)
-  // Add extra safety check to prevent redirect loops
-  if (!userId && isLoaded && typeof window !== 'undefined') {
-    // Only redirect if we're not already being redirected
-    if (!window.location.href.includes('/signin')) {
-      window.location.href = '/signin'
-    }
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Redirecting to sign in...</p>
-        </div>
-      </div>
-    )
-  }
+  // If user is not authenticated after loading, this will be handled by middleware
+  // We don't need client-side redirect logic here anymore
   
   // For all other pages, render with the main app layout (only when authenticated)
   return (

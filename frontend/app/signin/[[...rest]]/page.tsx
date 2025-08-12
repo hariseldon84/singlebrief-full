@@ -14,8 +14,11 @@ export default function SignInPage() {
             headerSubtitle: 'text-gray-600',
           }
         }}
-        fallbackRedirectUrl="/"
+        path="/signin"
+        routing="path"
         signUpUrl="/signup"
+        fallbackRedirectUrl="/"
+        afterSignInUrl="/"
       />
     </div>
   )

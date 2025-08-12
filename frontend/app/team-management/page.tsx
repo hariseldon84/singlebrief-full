@@ -60,28 +60,18 @@ export default function TeamManagementPage() {
     setShowMemberForm(true)
   }
 
-  // Convert TeamMember to TeamMemberFormData for the form
+  // Convert TeamMember to simplified form data for Clerk invitations (Story 16.1)
   const convertToFormData = (member: TeamMember) => {
     return {
-      user_id: member.user_id,
-      team_id: currentTeamId,
-      custom_role: member.custom_role,
-      custom_designation: member.custom_designation,
-      bio: member.bio,
-      location: member.location,
-      status: member.status,
-      current_workload: member.current_workload,
-      capacity_percentage: member.capacity_percentage,
-      query_contact_preference: member.query_contact_preference,
-      urgent_contact_preference: member.urgent_contact_preference,
-      notification_preference: member.query_contact_preference, // Default fallback
-      response_time_expectation_hours: member.response_time_expectation_hours,
-      working_days: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'], // Default
-      expertise_tags: member.expertise_tags?.map(tag => ({
-        tag_id: tag.id,
-        proficiency_level: 3 // Default proficiency level
-      })) || [],
-      platform_accounts: [] // Would need to fetch this data separately
+      name: member.user_id, // TODO: Get actual name from Clerk user data
+      email: '', // TODO: Get email from Clerk user data  
+      job_title: member.custom_role || '',
+      department: '', // TODO: Get department from team member data
+      location: member.location || '',
+      timezone: '', // TODO: Get timezone from team member data
+      bio: member.bio || '',
+      send_invitation: false, // Don't send again for existing members
+      invitation_message: ''
     }
   }
 
@@ -95,8 +85,8 @@ export default function TeamManagementPage() {
       }
 
       const url = editingMember 
-        ? `/api/v1/team-management/members/${editingMember.id}`
-        : '/api/v1/team-management/members'
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team-management/members/${editingMember.id}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team-management/members`
       
       const method = editingMember ? 'PUT' : 'POST'
       
@@ -116,10 +106,10 @@ export default function TeamManagementPage() {
       if (response.ok) {
         const savedMember = await response.json()
         
-        // Send Clerk invitation if requested and this is a new member
+        // Send Clerk invitation if requested and this is a new member (Story 16.1)
         if (!editingMember && memberData.send_invitation) {
           try {
-            const invitationResponse = await fetch('/api/v1/team-management/clerk-invitations', {
+            const invitationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team-management/clerk-invitations`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -128,25 +118,26 @@ export default function TeamManagementPage() {
               body: JSON.stringify({
                 email: memberData.email,
                 first_name: memberData.name.split(' ')[0],
-                last_name: memberData.name.split(' ').slice(1).join(' '),
+                last_name: memberData.name.split(' ').slice(1).join(' ') || memberData.name.split(' ')[0],
                 role: 'basic_member',
-                redirect_url: `${window.location.origin}/auth/callback`
+                redirect_url: `${window.location.origin}/auth/callback`,
+                message: memberData.invitation_message
               })
             })
 
             const inviteResult = await invitationResponse.json()
             
             if (inviteResult.success) {
-              alert(`Team member added and Clerk invitation sent to ${memberData.email}`)
+              alert(`✅ Success!\n\nTeam member profile created and Clerk invitation sent to ${memberData.email}.\n\nThey will receive a secure signup link and automatically join your organization.`)
             } else {
-              alert(`Team member added but Clerk invitation failed: ${inviteResult.error || 'Unknown error'}`)
+              alert(`⚠️ Warning\n\nTeam member profile was created, but Clerk invitation failed:\n\n${inviteResult.error || 'Unknown error'}\n\nYou may need to send the invitation manually.`)
             }
           } catch (inviteError) {
             console.error('Failed to send Clerk invitation:', inviteError)
-            alert(`Team member added but Clerk invitation failed to send to ${memberData.email}`)
+            alert(`⚠️ Warning\n\nTeam member profile was created, but Clerk invitation failed to send to ${memberData.email}.\n\nPlease check the backend logs and try again.`)
           }
         } else {
-          alert(editingMember ? 'Team member updated successfully' : 'Team member added successfully')
+          alert(editingMember ? '✅ Team member updated successfully!' : '✅ Team member profile created successfully!')
         }
         
         setShowMemberForm(false)
